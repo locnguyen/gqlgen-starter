@@ -4,6 +4,7 @@
 
 type Query {
   todos: [Todo!]!
+  users: [User]!
 }
 
 type Mutation {

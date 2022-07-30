@@ -2,8 +2,8 @@ package internal
 
 import (
 	"gqlgen-starter/config"
-	"gqlgen-starter/internal/graph"
 	"gqlgen-starter/internal/graph/generated"
+	"gqlgen-starter/internal/graph/resolvers"
 	"log"
 	"net/http"
 
@@ -12,7 +12,7 @@ import (
 )
 
 func StartServer() {
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolvers.RootResolver{}}))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
