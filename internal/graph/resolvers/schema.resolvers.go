@@ -14,4 +14,5 @@ func (r *RootResolver) Mutation() generated.MutationResolver { return &mutationR
 func (r *RootResolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *RootResolver }
+
 type queryResolver struct{ *RootResolver }
