@@ -20,9 +20,16 @@ If everything is peachy then you should see log output that looks like
 2022/07/17 07:43:56 connect to http://localhost:9000/ for GraphQL playground
 ```
 
+## Running Tests
+
+It's easy!
+
+`make test`
+
 ## To Dos
 - [ ] Add a database connection
+- [ ] Add an ORM?
 - [ ] Use structured logging
-- [ ] Example unit tests
+- [x] Example unit tests
 - [ ] Containerize this
 - [ ] Add a CI pipeline for GitHub Action and GitLab CI
