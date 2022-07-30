@@ -5,7 +5,8 @@ This is a simple starter kit for anyone wanting to build a GraphQL API using [gq
 ## Getting Started
 
 1. `go mod download`
-2. `make run`
+2. `touch .env`
+3. `make run`
 
 If everything is peachy then you should see log output that looks like
 
@@ -22,7 +23,7 @@ If everything is peachy then you should see log output that looks like
 
 ## Running Tests
 
-It's easy!
+It's easy! It should also output some test coverage numbers.
 
 `make test`
 
