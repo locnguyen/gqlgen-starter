@@ -31,9 +31,13 @@ Whichever method you choose to start the server, you should see log output that 
 
 ## Running Tests
 
-It's easy! It should also output some test coverage numbers.
+It's easy! Running `make test` will run unit tests in the internal/ dir. This will also output test coverage numbers.
 
-`make test`
+## Changing the GraphQL Schema
+
+To add to the schema, create a new .graphql file in internal/graph.
+
+Any changes to the schema should be followed by running `make graphql` to regenerate code.
 
 ## To Dos
 - [ ] Add a database connection

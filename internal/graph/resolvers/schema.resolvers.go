@@ -5,18 +5,17 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 	"gqlgen-starter/internal/graph/generated"
 )
 
 // Hello is the resolver for the hello field.
 func (r *mutationResolver) Hello(ctx context.Context) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	return "Hello world", nil
 }
 
 // Test is the resolver for the test field.
 func (r *queryResolver) Test(ctx context.Context) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	return "Testing!", nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
