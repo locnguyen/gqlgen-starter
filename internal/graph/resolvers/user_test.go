@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func TestUserResolver(t *testing.T) {
+func TestUserResolvers(t *testing.T) {
 	c := client.New(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: NewRootResolver()})))
 
 	t.Run("Users query", func(t *testing.T) {
@@ -21,5 +21,17 @@ func TestUserResolver(t *testing.T) {
 
 		c.MustPost(`{ users { id name } }`, &resp)
 		assert.NotEmpty(t, resp.Users)
+	})
+
+	t.Run("createUser mutation", func(t *testing.T) {
+		var resp struct {
+			CreateUser struct {
+				ID   string
+				Name string
+			}
+		}
+
+		c.MustPost(`mutation { createUser(input: { name: "Natasha Romanova" }) { id name } }`, &resp)
+		assert.Equal(t, "Natasha Romanova", resp.CreateUser.Name)
 	})
 }
