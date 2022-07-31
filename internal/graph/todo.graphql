@@ -9,3 +9,11 @@ type Todo {
     done: Boolean!
     user: User!
 }
+
+extend type Query {
+    todos: [Todo!]!
+}
+
+extend type Mutation {
+    createTodo(input: NewTodo!): Todo!
+}

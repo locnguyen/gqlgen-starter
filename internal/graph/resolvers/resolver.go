@@ -4,8 +4,8 @@ package resolvers
 //
 // It serves as dependency injection for your app, add any dependencies you require here.
 
-type RootResolver struct{}
+type Resolver struct{}
 
-func NewRootResolver() *RootResolver {
-	return &RootResolver{}
+func NewRootResolver() *Resolver {
+	return &Resolver{}
 }

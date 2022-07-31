@@ -1,10 +1,14 @@
 package resolvers
 
+// This file will be automatically regenerated based on the schema, any resolver implementations
+// will be copied through when generating and any unknown code will be moved to the end.
+
 import (
 	"context"
 	"gqlgen-starter/internal/graph/model"
 )
 
+// Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	users := make([]*model.User, 2)
 	users[0] = &model.User{

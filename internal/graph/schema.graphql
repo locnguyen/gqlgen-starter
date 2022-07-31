@@ -3,10 +3,9 @@
 # https://gqlgen.com/getting-started/
 
 type Query {
-  todos: [Todo!]!
-  users: [User]!
+  test: String!
 }
 
 type Mutation {
-  createTodo(input: NewTodo!): Todo!
+  hello: String!
 }
