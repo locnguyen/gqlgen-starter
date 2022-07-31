@@ -1,0 +1,8 @@
+.idea/
+.vscode/
+tmp/
+bin/
+README.md
+docker-compose.yml
+Dockerfile
+.gitignore

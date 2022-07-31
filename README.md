@@ -4,11 +4,19 @@ This is a simple starter kit for anyone wanting to build a GraphQL API using [gq
 
 ## Getting Started
 
+### Local Binary
+
 1. `go mod download`
 2. `touch .env`
 3. `make run`
 
-If everything is peachy then you should see log output that looks like
+### Dockerized
+
+1. `touch .env`
+2. `make up`
+
+
+Whichever method you choose to start the server, you should see log output that looks like
 
 ```
 2022/07/17 07:43:56 ******************************************
@@ -32,5 +40,5 @@ It's easy! It should also output some test coverage numbers.
 - [ ] Add an ORM?
 - [ ] Use structured logging
 - [x] Example unit tests
-- [ ] Containerize this
+- [x] Containerize this
 - [ ] Add a CI pipeline for GitHub Action and GitLab CI
