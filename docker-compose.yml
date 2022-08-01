@@ -14,3 +14,17 @@ services:
       - "9000:9000"
     volumes:
       - ${PWD:-.}:/home/${PROJECT_NAME}
+    depends_on:
+      - starter-db
+  starter-db:
+    image: postgres:13-alpine
+    container_name: starter-db
+    hostname: starter-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: starter-development
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_PORT: 5432
+      POSTGRES_HOST: starter-db

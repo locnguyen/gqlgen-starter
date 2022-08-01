@@ -5,9 +5,10 @@ import (
 )
 
 type applicationConfig struct {
-	ServerPort string
-	LogLevel   string
-	GoEnv      string
+	ServerPort  string
+	LogLevel    string
+	GoEnv       string
+	DatabaseURL string
 }
 
 var Application applicationConfig
@@ -25,4 +26,6 @@ func init() {
 
 	viper.SetDefault("GO_ENV", "development")
 	Application.GoEnv = viper.GetString("GO_ENV")
+
+	Application.DatabaseURL = viper.GetString("DATABASE_URL")
 }

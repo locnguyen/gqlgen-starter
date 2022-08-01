@@ -1,7 +1,9 @@
 # gqlgen-starter
 
-This is a simple starter kit for anyone wanting to build a GraphQL API using [gqlgen](https://github.com/99designs/gqlgen).
-
+This is a starter kit for anyone wanting to build a GraphQL API using [gqlgen](https://github.com/99designs/gqlgen).
+It's based on my preferences for particular technologies, so it may not suit you perfectly. At the very least
+I hope it helps you construct your own application.
+ d
 ## Getting Started
 
 ### Local Binary
@@ -40,9 +42,5 @@ To add to the schema, create a new .graphql file in internal/graph.
 Any changes to the schema should be followed by running `make graphql` to regenerate code.
 
 ## To Dos
-- [ ] Add a database connection
-- [ ] Add an ORM?
-- [ ] Use structured logging
-- [x] Example unit tests
-- [x] Containerize this
+- [ ] Add an ORM? Ent!
 - [ ] Add a CI pipeline for GitHub Action and GitLab CI
