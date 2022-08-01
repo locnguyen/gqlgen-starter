@@ -7,12 +7,12 @@ This is a simple starter kit for anyone wanting to build a GraphQL API using [gq
 ### Local Binary
 
 1. `go mod download`
-2. `touch .env`
+2. `touch .env` and copy contents of `.env.example` in there. Customize if you want.
 3. `make run`
 
 ### Dockerized
 
-1. `touch .env`
+1. `touch .env` and copy contents of `.env.example` in there. Customize if you want.
 2. `make up`
 
 
