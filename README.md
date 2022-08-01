@@ -1,9 +1,12 @@
 # gqlgen-starter
 
-This is a starter kit for anyone wanting to build a GraphQL API using [gqlgen](https://github.com/99designs/gqlgen).
-It's based on my preferences for particular technologies, so it may not suit you perfectly. At the very least
-I hope it helps you construct your own application.
- d
+This is a starter kit for building a GraphQL API using Go. It's based on my preferences for particular
+technologies, so it may not suit you perfectly. At the very least, I hope it helps construct your own application.
+
+* [gqlgen](https://github.com/99designs/gqlgen)
+* Postgres and [pgx](https://github.com/JackC/pgx)
+* [Zerolog](https://github.com/obsidiandynamics/zerolog)
+
 ## Getting Started
 
 ### Local Binary
