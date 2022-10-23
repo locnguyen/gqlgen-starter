@@ -17,8 +17,10 @@
 .idea
 .vscode
 
-tmp
 !bin/.gitkeep
 bin
+
+!tmp/.gitkeep
+tmp
 
 .env
