@@ -1,45 +1,82 @@
 package internal
 
 import (
+	"fmt"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
+	"gqlgen-starter/cmd/build"
 	"gqlgen-starter/config"
 	"gqlgen-starter/db"
+	"gqlgen-starter/internal/app"
 	"gqlgen-starter/internal/graph/generated"
 	"gqlgen-starter/internal/graph/resolvers"
 	"net/http"
 	"os"
+	"time"
 )
 
 func StartServer() {
-	initZeroLogger()
+	logger := initZeroLogger()
 
-	_, err := db.OpenConnection()
+	logger.Info().Msg("******************************************")
+	logger.Info().Msgf("\tBuild Version: %s", build.BuildVersion)
+	logger.Info().Msgf("\tBuild Commit: %s", build.BuildCommit)
+	logger.Info().Msgf("\tBuild Time: %s", build.BuildTime)
+	logger.Info().Msg("******************************************")
 
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolvers.Resolver{}}))
+	conn, err := db.OpenConnection(logger)
+	if err != nil {
+		logger.Fatal().Err(err).Msg("NO DATABASE CONNECTION")
+	}
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	appCtx := &app.AppContext{DB: conn, Logger: logger}
+
+	rootResolver := resolvers.NewRootResolver(appCtx)
+
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: rootResolver}))
+
+	if config.Application.IsDevelopment() {
+		http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+		logger.Info().Msgf("connect to http://localhost:%s/ for GraphQL playground", config.Application.ServerPort)
+	}
+
 	http.Handle("/query", srv)
 
-	log.Info().Msgf("connect to http://localhost:%s/ for GraphQL playground", config.Application.ServerPort)
-	err = http.ListenAndServe(":"+config.Application.ServerPort, nil)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Could not start HTTP server")
+	logger.Info().Msgf("Starting GraphQL API Server at :%s 🚀", config.Application.ServerPort)
+	if err = http.ListenAndServe(fmt.Sprintf(":%s", config.Application.ServerPort), nil); err != nil {
+		logger.Fatal().Err(err).Msg("💀  Could not start HTTP server")
 	}
-	log.Info().Msg("Started GraphQL API Server 🚀")
 }
 
-// This should be called first, so we have a proper logger
-func initZeroLogger() {
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+// This should be called first, so we have a proper logger. Inspiration taken from
+// https://betterstack.com/community/guides/logging/zerolog/
+func initZeroLogger() *zerolog.Logger {
 	logLevel, err := zerolog.ParseLevel(config.Application.LogLevel)
 	if err != nil {
 		logLevel = zerolog.InfoLevel
 	}
-	zerolog.SetGlobalLevel(logLevel)
-	if config.Application.GoEnv == "development" {
-		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+
+	var logger zerolog.Logger
+
+	// Usually we'll always want logs as JSON unless we're working on our local machine
+	if config.Application.StructuredLogging {
+		logger = zerolog.New(os.Stdout).
+			Level(logLevel).
+			With().
+			Timestamp().
+			Str("BuildCommit", build.BuildCommit).
+			Str("BuildVersion", build.BuildVersion).
+			Logger()
+	} else {
+
+		logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}).
+			Level(logLevel).
+			With().
+			Timestamp().
+			Caller().
+			Logger()
 	}
+
+	return &logger
 }

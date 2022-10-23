@@ -10,24 +10,26 @@ import (
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUserInput) (*model.User, error) {
+	r.Logger.Debug().Str("mutation", "createUser").Msgf("%v", input)
 	return &model.User{
-		ID:   "1",
-		Name: "Natasha Romanova",
+		ID:             "123",
+		FirstName:      input.FirstName,
+		LastName:       input.LastName,
+		Email:          input.Email,
+		PhoneNumber:    input.PhoneNumber,
+		GraduationDate: nil,
 	}, nil
 }
 
-// Users is the resolver for the users field.
-func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	users := make([]*model.User, 2)
-	users[0] = &model.User{
-		ID:   "1",
-		Name: "Natasha Romanova",
-	}
-
-	users[1] = &model.User{
-		ID:   "2",
-		Name: "Steve Rogers",
-	}
-
-	return users, nil
+// User is the resolver for the user field.
+func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
+	r.Logger.Debug().Msg("query: user(id: ID!)")
+	return &model.User{
+		ID:             "123",
+		FirstName:      "Natasha",
+		LastName:       "Romanova",
+		Email:          "blackwidow@avengers.com",
+		PhoneNumber:    "+17142358092",
+		GraduationDate: nil,
+	}, nil
 }

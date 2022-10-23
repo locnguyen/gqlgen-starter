@@ -24,14 +24,11 @@ technologies, so it may not suit you perfectly. At the very least, I hope it hel
 Whichever method you choose to start the server, you should see log output that looks like
 
 ```
-2022/07/17 07:43:56 ******************************************
-2022/07/17 07:43:56     Build Commit: dc0b1a11
-2022/07/17 07:43:56     Build Time: Sun Jul 17 14:43:55 UTC 2022
-2022/07/17 07:43:56     Environment Variables: {
-  "ServerPort": "9000"
-}
-2022/07/17 07:43:56 ******************************************
-2022/07/17 07:43:56 connect to http://localhost:9000/ for GraphQL playground
+gqlgen-starter         | 2022-10-23T04:29:59Z INF internal/server.go:22 > ******************************************
+gqlgen-starter         | 2022-10-23T04:29:59Z INF internal/server.go:23 >       Build Version: 0.0.1
+gqlgen-starter         | 2022-10-23T04:29:59Z INF internal/server.go:24 >       Build Commit: dc7e9bd7
+gqlgen-starter         | 2022-10-23T04:29:59Z INF internal/server.go:25 >       Build Time: Sun Oct 23 04:29:57 UTC 2022
+gqlgen-starter         | 2022-10-23T04:29:59Z INF internal/server.go:26 > ******************************************
 ```
 
 ## Running Tests

@@ -1,6 +1,6 @@
 version: "3.9"
 services:
-  starter-api:
+  gqlgen-starter-api:
     hostname: ${PROJECT_NAME}
     container_name: ${PROJECT_NAME}
     build:
@@ -15,16 +15,11 @@ services:
     volumes:
       - ${PWD:-.}:/home/${PROJECT_NAME}
     depends_on:
-      - starter-db
-  starter-db:
+      - gqlgen-starter-api-db
+  gqlgen-starter-api-db:
     image: postgres:13-alpine
-    container_name: starter-db
-    hostname: starter-db
+    container_name: gqlgen-starter-api-db
+    hostname: gqlgenstarterapidb
     ports:
       - "5432:5432"
-    environment:
-      POSTGRES_DB: starter-development
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_PORT: 5432
-      POSTGRES_HOST: starter-db
+    env_file: .env

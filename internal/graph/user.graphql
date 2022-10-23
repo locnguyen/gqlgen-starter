@@ -1,14 +1,22 @@
 type User {
     id: ID!
-    name: String!
+    firstName:   String!
+    lastName:    String!
+    email:       String!
+    phoneNumber: String!
 }
 
 input CreateUserInput {
-    name: String!
+    firstName:   String!
+    lastName:    String!
+    email:       String!
+    phoneNumber: String!
+    password: String!
+    passwordConfirmation: String!
 }
 
 extend type Query {
-    users: [User]!
+    user(id: ID!): User
 }
 
 extend type Mutation {

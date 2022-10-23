@@ -1,11 +1,15 @@
 package resolvers
 
+import "gqlgen-starter/internal/app"
+
 // This file will not be regenerated automatically.
 //
 // It serves as dependency injection for your app, add any dependencies you require here.
 
-type Resolver struct{}
+type Resolver struct {
+	*app.AppContext
+}
 
-func NewRootResolver() *Resolver {
-	return &Resolver{}
+func NewRootResolver(appCtx *app.AppContext) *Resolver {
+	return &Resolver{appCtx}
 }
