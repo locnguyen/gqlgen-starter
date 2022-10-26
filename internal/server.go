@@ -25,12 +25,12 @@ func StartServer() {
 	logger.Info().Msgf("\tBuild Time: %s", build.BuildTime)
 	logger.Info().Msg("******************************************")
 
-	conn, err := db.OpenConnection(logger)
+	conn, entClient, err := db.OpenConnection(logger)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("NO DATABASE CONNECTION")
 	}
 
-	appCtx := &app.AppContext{DB: conn, Logger: logger}
+	appCtx := &app.AppContext{DB: conn, EntClient: entClient, Logger: logger}
 
 	rootResolver := resolvers.NewRootResolver(appCtx)
 

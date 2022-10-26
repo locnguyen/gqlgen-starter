@@ -41,6 +41,21 @@ To add to the schema, create a new .graphql file in internal/graph.
 
 Any changes to the schema should be followed by running `make graphql` to regenerate code.
 
+## Changing the Database Schema
+
+After changing the ent schema, the physical database schema needs to be updated too. Using the [atlas](https://atlasgo.io) 
+migration engine, this code can be generated
+
+```bash
+% NAME=create_users make migration
+```
+
+and applied locally
+
+```bash
+% make migration-apply
+```
+
 ## To Dos
 - [ ] Add an ORM? Ent!
 - [ ] Add a CI pipeline for GitHub Action and GitLab CI
