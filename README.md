@@ -57,5 +57,4 @@ and applied locally
 ```
 
 ## To Dos
-- [ ] Add an ORM? Ent!
 - [ ] Add a CI pipeline for GitHub Action and GitLab CI
