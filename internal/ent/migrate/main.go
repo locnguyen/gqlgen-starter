@@ -24,9 +24,9 @@ func main() {
 	}
 	// Migrate diff options.
 	opts := []schema.MigrateOption{
-		schema.WithDir(dir),                         // provide migration directory
-		schema.WithMigrationMode(schema.ModeReplay), // provide migration mode
-		schema.WithDialect(dialect.Postgres),        // Ent dialect to use
+		schema.WithDir(dir),                          // provide migration directory
+		schema.WithMigrationMode(schema.ModeInspect), // provide migration mode
+		schema.WithDialect(dialect.Postgres),         // Ent dialect to use
 		schema.WithFormatter(atlas.DefaultFormatter),
 	}
 	if len(os.Args) != 2 {

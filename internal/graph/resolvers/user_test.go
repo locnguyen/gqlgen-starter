@@ -34,15 +34,12 @@ func TestUserResolvers(t *testing.T) {
 	t.Run("createUser mutation", func(t *testing.T) {
 		var resp struct {
 			CreateUser struct {
-				ID          string `json:"id"`
-				FirstName   string `json:"firstName"`
-				LastName    string `json:"lastName"`
-				Email       string `json:"email"`
-				PhoneNumber string `json:"phoneNumber"`
+				Sid    string `json:"sid"`
+				Expiry string `json:"expiry"`
 			}
 		}
 
-		c.MustPost(`mutation { createUser(input: { firstName: "Natasha" lastName: "Romanova" email: "blackwidow@avengers.com" phoneNumber: "+17142358092" password: "P@ssw0rd!" passwordConfirmation: "P@ssw0rd!" }) { id firstName } }`, &resp)
-		assert.Equal(t, "Natasha", resp.CreateUser.FirstName)
+		c.MustPost(`mutation { createUser(input: { firstName: "Natasha" lastName: "Romanova" email: "blackwidow@avengers.com" phoneNumber: "+17142358092" password: "P@ssw0rd!" passwordConfirmation: "P@ssw0rd!" }) { sid } }`, &resp)
+		assert.Equal(t, "123abc", resp.CreateUser.Sid)
 	})
 }

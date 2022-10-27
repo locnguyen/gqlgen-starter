@@ -7,6 +7,7 @@ GIT_COMMIT := $(shell git rev-parse --short=8 HEAD)
 TIMESTAMP := $(shell date +%s)
 PROJECT_NAME := $(notdir $(PWD))
 HOST_DB_URL := "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@localhost:$(POSTGRES_PORT)/$(POSTGRES_DB)?sslmode=disable"
+HOST_TEST_DB_URL := "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@localhost:$(POSTGRES_PORT)/test?sslmode=disable"
 
 export PROJECT_NAME
 
@@ -24,20 +25,15 @@ ent:
 
 # Creates a new model in the ent schema
 ent-init:
-	go run -mod=mod entgo.io/ent/cmd/ent init --target ./internal/ent $(MODEL)
+	go run -mod=mod entgo.io/ent/cmd/ent init --target ./internal/ent/schema $(MODEL)
 
 # Generate gql related code after the GraphQL schema changes
 graphql:
 	go run github.com/99designs/gqlgen generate
 
-# Creates a new migration file in db/migrations. Use like \
-> NAME=create_users make migration
+# Creates a new migration file in db/migrations. Atlas will first inspect the test database and perform a diff
 migration:
 	go run -mod=mod internal/ent/migrate/main.go $(NAME)
-
-# Starts a containerized Postgres database for the atlas engine. See https://atlasgo.io/concepts/dev-database
-migration-db:
-	docker run --name atlas-migration --rm -p 5678:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=test -d postgres
 
 # When the hash sum is invalid because you manually updated a file after the hash sum was generated, this command \
 will force Atlas to recompute the value
@@ -52,6 +48,10 @@ migration-lint:
 # Applies the latest migrations in the local development database
 migrate-apply-local:
 	atlas migrate apply --dir="file://db/migrations" --url=$(HOST_DB_URL)
+
+# Applies the latest migrations in the local development database
+migrate-apply-test:
+	atlas migrate apply --dir="file://db/migrations" --url="postgres://postgres:postgres@localhost:5678/test?sslmode=disable"
 
 # Run the API locally in a hot reload environment
 run:

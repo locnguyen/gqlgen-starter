@@ -43,6 +43,7 @@ resolver:
 # if they match it will use them, otherwise it will generate them.
 autobind:
 #  - "gqlgen-starter/graph/model"
+  - "gqlgen-starter/internal/ent"
 
 # This section declares type mapping between the GraphQL and go type systems
 #

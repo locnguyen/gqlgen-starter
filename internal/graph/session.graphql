@@ -1,0 +1,4 @@
+type Session {
+    sid: String!
+    expiry: Time!
+}

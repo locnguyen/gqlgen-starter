@@ -4,6 +4,7 @@ package ent
 
 import (
 	"gqlgen-starter/internal/ent/schema"
+	"gqlgen-starter/internal/ent/session"
 	"gqlgen-starter/internal/ent/user"
 	"time"
 )
@@ -12,6 +13,16 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	sessionFields := schema.Session{}.Fields()
+	_ = sessionFields
+	// sessionDescSid is the schema descriptor for sid field.
+	sessionDescSid := sessionFields[0].Descriptor()
+	// session.SidValidator is a validator for the "sid" field. It is called by the builders before save.
+	session.SidValidator = sessionDescSid.Validators[0].(func(string) error)
+	// sessionDescDeleted is the schema descriptor for deleted field.
+	sessionDescDeleted := sessionFields[2].Descriptor()
+	// session.DefaultDeleted holds the default value on creation for the deleted field.
+	session.DefaultDeleted = sessionDescDeleted.Default.(bool)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
 	_ = userMixinFields0

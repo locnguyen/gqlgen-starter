@@ -15,11 +15,15 @@ type CreateUserInput struct {
 	PasswordConfirmation string `json:"passwordConfirmation"`
 }
 
+type Session struct {
+	Sid    string    `json:"sid"`
+	Expiry time.Time `json:"expiry"`
+}
+
 type User struct {
-	ID             string     `json:"id"`
-	FirstName      string     `json:"firstName"`
-	LastName       string     `json:"lastName"`
-	Email          string     `json:"email"`
-	PhoneNumber    string     `json:"phoneNumber"`
-	GraduationDate *time.Time `json:"graduationDate"`
+	ID          string `json:"id"`
+	FirstName   string `json:"firstName"`
+	LastName    string `json:"lastName"`
+	Email       string `json:"email"`
+	PhoneNumber string `json:"phoneNumber"`
 }
