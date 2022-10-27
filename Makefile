@@ -42,7 +42,7 @@ migration-db:
 # When the hash sum is invalid because you manually updated a file after the hash sum was generated, this command \
 will force Atlas to recompute the value
 migration-hash:
-	atlas migrate hash --dir="file://$(PWD)/db/migrations"
+	atlas migrate hash --dir="file://db/migrations"
 
 # If the "dev database" is running from the migration-db target, then this will analyze the code in db/migrations for \
 potentially dangerous changes
@@ -51,7 +51,7 @@ migration-lint:
 
 # Applies the latest migrations in the local development database
 migrate-apply-local:
-	atlas migrate apply --dir="file://$(PWD)/db/migrations" --url=$(HOST_DB_URL)
+	atlas migrate apply --dir="file://db/migrations" --url=$(HOST_DB_URL)
 
 # Run the API locally in a hot reload environment
 run:
