@@ -37,7 +37,7 @@ var (
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "email", Type: field.TypeString},
-		{Name: "hashed_password", Type: field.TypeString},
+		{Name: "hashed_password", Type: field.TypeBytes},
 		{Name: "first_name", Type: field.TypeString},
 		{Name: "last_name", Type: field.TypeString},
 		{Name: "phone_number", Type: field.TypeString},

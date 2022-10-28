@@ -577,7 +577,7 @@ type UserMutation struct {
 	create_time     *time.Time
 	update_time     *time.Time
 	email           *string
-	hashed_password *string
+	hashed_password *[]byte
 	first_name      *string
 	last_name       *string
 	phone_number    *string
@@ -803,12 +803,12 @@ func (m *UserMutation) ResetEmail() {
 }
 
 // SetHashedPassword sets the "hashed_password" field.
-func (m *UserMutation) SetHashedPassword(s string) {
-	m.hashed_password = &s
+func (m *UserMutation) SetHashedPassword(b []byte) {
+	m.hashed_password = &b
 }
 
 // HashedPassword returns the value of the "hashed_password" field in the mutation.
-func (m *UserMutation) HashedPassword() (r string, exists bool) {
+func (m *UserMutation) HashedPassword() (r []byte, exists bool) {
 	v := m.hashed_password
 	if v == nil {
 		return
@@ -819,7 +819,7 @@ func (m *UserMutation) HashedPassword() (r string, exists bool) {
 // OldHashedPassword returns the old "hashed_password" field's value of the User entity.
 // If the User object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *UserMutation) OldHashedPassword(ctx context.Context) (v string, err error) {
+func (m *UserMutation) OldHashedPassword(ctx context.Context) (v []byte, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldHashedPassword is only allowed on UpdateOne operations")
 	}
@@ -1117,7 +1117,7 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		m.SetEmail(v)
 		return nil
 	case user.FieldHashedPassword:
-		v, ok := value.(string)
+		v, ok := value.([]byte)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}

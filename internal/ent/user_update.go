@@ -42,8 +42,8 @@ func (uu *UserUpdate) SetEmail(s string) *UserUpdate {
 }
 
 // SetHashedPassword sets the "hashed_password" field.
-func (uu *UserUpdate) SetHashedPassword(s string) *UserUpdate {
-	uu.mutation.SetHashedPassword(s)
+func (uu *UserUpdate) SetHashedPassword(b []byte) *UserUpdate {
+	uu.mutation.SetHashedPassword(b)
 	return uu
 }
 
@@ -203,7 +203,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := uu.mutation.HashedPassword(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeBytes,
 			Value:  value,
 			Column: user.FieldHashedPassword,
 		})
@@ -315,8 +315,8 @@ func (uuo *UserUpdateOne) SetEmail(s string) *UserUpdateOne {
 }
 
 // SetHashedPassword sets the "hashed_password" field.
-func (uuo *UserUpdateOne) SetHashedPassword(s string) *UserUpdateOne {
-	uuo.mutation.SetHashedPassword(s)
+func (uuo *UserUpdateOne) SetHashedPassword(b []byte) *UserUpdateOne {
+	uuo.mutation.SetHashedPassword(b)
 	return uuo
 }
 
@@ -506,7 +506,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if value, ok := uuo.mutation.HashedPassword(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeBytes,
 			Value:  value,
 			Column: user.FieldHashedPassword,
 		})

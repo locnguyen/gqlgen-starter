@@ -18,7 +18,8 @@ func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int64("id"),
 		field.String("email"),
-		field.String("hashed_password"),
+		field.Bytes("hashed_password").
+			Sensitive(),
 		field.String("first_name"),
 		field.String("last_name"),
 		field.String("phone_number"),

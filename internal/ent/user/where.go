@@ -103,7 +103,7 @@ func Email(v string) predicate.User {
 }
 
 // HashedPassword applies equality check predicate on the "hashed_password" field. It's identical to HashedPasswordEQ.
-func HashedPassword(v string) predicate.User {
+func HashedPassword(v []byte) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldHashedPassword), v))
 	})
@@ -358,21 +358,21 @@ func EmailContainsFold(v string) predicate.User {
 }
 
 // HashedPasswordEQ applies the EQ predicate on the "hashed_password" field.
-func HashedPasswordEQ(v string) predicate.User {
+func HashedPasswordEQ(v []byte) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldHashedPassword), v))
 	})
 }
 
 // HashedPasswordNEQ applies the NEQ predicate on the "hashed_password" field.
-func HashedPasswordNEQ(v string) predicate.User {
+func HashedPasswordNEQ(v []byte) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldHashedPassword), v))
 	})
 }
 
 // HashedPasswordIn applies the In predicate on the "hashed_password" field.
-func HashedPasswordIn(vs ...string) predicate.User {
+func HashedPasswordIn(vs ...[]byte) predicate.User {
 	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -383,7 +383,7 @@ func HashedPasswordIn(vs ...string) predicate.User {
 }
 
 // HashedPasswordNotIn applies the NotIn predicate on the "hashed_password" field.
-func HashedPasswordNotIn(vs ...string) predicate.User {
+func HashedPasswordNotIn(vs ...[]byte) predicate.User {
 	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -394,65 +394,30 @@ func HashedPasswordNotIn(vs ...string) predicate.User {
 }
 
 // HashedPasswordGT applies the GT predicate on the "hashed_password" field.
-func HashedPasswordGT(v string) predicate.User {
+func HashedPasswordGT(v []byte) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldHashedPassword), v))
 	})
 }
 
 // HashedPasswordGTE applies the GTE predicate on the "hashed_password" field.
-func HashedPasswordGTE(v string) predicate.User {
+func HashedPasswordGTE(v []byte) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldHashedPassword), v))
 	})
 }
 
 // HashedPasswordLT applies the LT predicate on the "hashed_password" field.
-func HashedPasswordLT(v string) predicate.User {
+func HashedPasswordLT(v []byte) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldHashedPassword), v))
 	})
 }
 
 // HashedPasswordLTE applies the LTE predicate on the "hashed_password" field.
-func HashedPasswordLTE(v string) predicate.User {
+func HashedPasswordLTE(v []byte) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldHashedPassword), v))
-	})
-}
-
-// HashedPasswordContains applies the Contains predicate on the "hashed_password" field.
-func HashedPasswordContains(v string) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldHashedPassword), v))
-	})
-}
-
-// HashedPasswordHasPrefix applies the HasPrefix predicate on the "hashed_password" field.
-func HashedPasswordHasPrefix(v string) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldHashedPassword), v))
-	})
-}
-
-// HashedPasswordHasSuffix applies the HasSuffix predicate on the "hashed_password" field.
-func HashedPasswordHasSuffix(v string) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldHashedPassword), v))
-	})
-}
-
-// HashedPasswordEqualFold applies the EqualFold predicate on the "hashed_password" field.
-func HashedPasswordEqualFold(v string) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldHashedPassword), v))
-	})
-}
-
-// HashedPasswordContainsFold applies the ContainsFold predicate on the "hashed_password" field.
-func HashedPasswordContainsFold(v string) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldHashedPassword), v))
 	})
 }
 

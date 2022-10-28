@@ -11,6 +11,7 @@ import (
 )
 
 func OpenConnection(logger *zerolog.Logger) (*sql.DB, *ent.Client, error) {
+	logger.Info().Msg("Trying to open database connection...")
 	conn, err := sql.Open("pgx", config.Application.DatabaseURL)
 	if err != nil {
 		logger.Error().Err(err).Msgf("Could not connect to Postgres")

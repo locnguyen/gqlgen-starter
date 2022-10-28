@@ -56,8 +56,8 @@ func (uc *UserCreate) SetEmail(s string) *UserCreate {
 }
 
 // SetHashedPassword sets the "hashed_password" field.
-func (uc *UserCreate) SetHashedPassword(s string) *UserCreate {
-	uc.mutation.SetHashedPassword(s)
+func (uc *UserCreate) SetHashedPassword(b []byte) *UserCreate {
+	uc.mutation.SetHashedPassword(b)
 	return uc
 }
 
@@ -269,7 +269,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := uc.mutation.HashedPassword(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeBytes,
 			Value:  value,
 			Column: user.FieldHashedPassword,
 		})
