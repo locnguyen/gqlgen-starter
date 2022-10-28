@@ -13,6 +13,7 @@ import (
 	"gqlgen-starter/config"
 	"gqlgen-starter/db"
 	"gqlgen-starter/internal/app"
+	"gqlgen-starter/internal/ent/session"
 	"gqlgen-starter/internal/ent/user"
 	"gqlgen-starter/internal/graph/generated"
 	"os"
@@ -105,6 +106,16 @@ func TestUserResolvers(t *testing.T) {
 		gqlGenClient.MustPost(`mutation { createUser(input: { firstName: "Natasha" lastName: "Romanova" email: "blackwidow@avengers.com" phoneNumber: "+8888888888" password: "P@ssw0rd!" passwordConfirmation: "P@ssw0rd!" }) { sid expiry } }`, &resp)
 		assert.NotEmpty(t, resp.CreateUser.Sid)
 		assert.NotEmpty(t, resp.CreateUser.Expiry)
+
+		sess, err := entClient.Session.Query().
+			Where(session.Sid(resp.CreateUser.Sid)).
+			Only(ctx)
+
+		if err != nil {
+			t.Error(err)
+		}
+
+		assert.Equal(t, resp.CreateUser.Sid, sess.Sid)
 
 		subject, err := entClient.User.Query().
 			Where(user.Email("blackwidow@avengers.com")).

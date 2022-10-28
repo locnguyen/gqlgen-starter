@@ -5,10 +5,13 @@ package resolvers
 
 import (
 	"context"
+	"encoding/base32"
 	"errors"
 	"gqlgen-starter/internal/ent"
+	"gqlgen-starter/internal/ent/session"
 	"gqlgen-starter/internal/graph/generated"
 	"gqlgen-starter/internal/graph/model"
+	"math/rand"
 	"strconv"
 	"strings"
 	"time"
@@ -41,12 +44,29 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 		return nil, err
 	}
 
-	r.Logger.Debug().Str("mutation", "createUser").Interface("result", u).Msg("Created user")
+	r.Logger.Debug().
+		Str("mutation", "createUser").
+		Interface("result", u).
+		Msg("Created user")
 
-	return &ent.Session{
-		Sid:    "123abc",
-		Expiry: time.Now().Add(time.Hour * 24),
-	}, nil
+	randomBytes := make([]byte, 16)
+	_, err = rand.Read(randomBytes)
+	if err != nil {
+		r.Logger.Err(err).Msg("Error creating session")
+		return nil, err
+	}
+	sid := base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(randomBytes)
+
+	sess, err := r.EntClient.Session.Create().
+		SetSid(sid).
+		SetExpiry(time.Now().Add(24 * time.Hour)).
+		SetType(session.TypeGeneral).
+		SetUser(u).
+		Save(ctx)
+
+	r.Logger.Debug().Interface("session", sess).Msg("Created user then session")
+
+	return sess, nil
 }
 
 // User is the resolver for the user field.
