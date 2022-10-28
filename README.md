@@ -6,6 +6,7 @@ technologies, so it may not suit you perfectly. At the very least, I hope it hel
 * [gqlgen](https://github.com/99designs/gqlgen)
 * Postgres and [pgx](https://github.com/JackC/pgx)
 * [Zerolog](https://github.com/obsidiandynamics/zerolog)
+* [Ent](https://entgo.io) as the ORM
 
 ## Getting Started
 
