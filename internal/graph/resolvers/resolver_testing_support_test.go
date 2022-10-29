@@ -3,9 +3,53 @@ package resolvers
 import (
 	"context"
 	"fmt"
+	"github.com/99designs/gqlgen/client"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/rs/zerolog"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
+	"gqlgen-starter/db"
+	"gqlgen-starter/internal/app"
+	"gqlgen-starter/internal/graph/generated"
+	"os"
+	"testing"
 )
+
+type TestContext struct {
+	GqlGenClient *client.Client
+	AppCtx       *app.AppContext
+	pgContainer  testcontainers.Container
+}
+
+func InitTestContext(t *testing.T) *TestContext {
+	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout})
+	ctx := context.Background()
+
+	postgresC, databaseURL, err := StartPgContainer(&logger, "user_test_db")
+	if err != nil {
+		t.Error(err)
+	}
+
+	dbConn, entClient, err := db.OpenConnection(&logger, *databaseURL)
+
+	if err := entClient.Schema.Create(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	appCtx := &app.AppContext{
+		DB:        dbConn,
+		EntClient: entClient,
+		Logger:    &logger,
+	}
+
+	gqlGenClient := client.New(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: NewRootResolver(appCtx)})))
+
+	return &TestContext{
+		GqlGenClient: gqlGenClient,
+		AppCtx:       appCtx,
+		pgContainer:  postgresC,
+	}
+}
 
 func StartPgContainer(logger testcontainers.Logging, containerName string) (testcontainers.Container, *string, error) {
 	ctx := context.Background()

@@ -4,26 +4,17 @@ import (
 	"context"
 	"fmt"
 	"github.com/99designs/gqlgen/client"
-	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/go-faker/faker/v4"
-	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"github.com/testcontainers/testcontainers-go"
-	"gqlgen-starter/db"
-	"gqlgen-starter/internal/app"
 	"gqlgen-starter/internal/ent/session"
 	"gqlgen-starter/internal/ent/user"
-	"gqlgen-starter/internal/graph/generated"
-	"os"
 	"testing"
 )
 
 type UserResolverSuite struct {
 	suite.Suite
-	GqlGenClient *client.Client
-	AppCtx       *app.AppContext
-	pgContainer  testcontainers.Container
+	TestContext
 }
 
 func TestUserResolverSuite(t *testing.T) {
@@ -31,28 +22,7 @@ func TestUserResolverSuite(t *testing.T) {
 }
 
 func (suite *UserResolverSuite) SetupSuite() {
-	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout})
-	ctx := context.Background()
-
-	postgresC, databaseURL, err := StartPgContainer(&logger, "user_test_db")
-	if err != nil {
-		suite.T().Error(err)
-	}
-	suite.pgContainer = postgresC
-
-	dbConn, entClient, err := db.OpenConnection(&logger, *databaseURL)
-
-	if err := entClient.Schema.Create(ctx); err != nil {
-		suite.T().Fatal(err)
-	}
-
-	suite.AppCtx = &app.AppContext{
-		DB:        dbConn,
-		EntClient: entClient,
-		Logger:    &logger,
-	}
-
-	suite.GqlGenClient = client.New(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: NewRootResolver(suite.AppCtx)})))
+	suite.TestContext = *InitTestContext(suite.T())
 }
 
 func (suite *UserResolverSuite) TearDownSuite() {
@@ -97,7 +67,6 @@ func (suite *UserResolverSuite) TestCreateUserMutation() {
 			Expiry string `json:"expiry"`
 		}
 	}
-
 	suite.GqlGenClient.MustPost(`mutation { createUser(input: { firstName: "Natasha" lastName: "Romanova" email: "blackwidow@avengers.com" phoneNumber: "+8888888888" password: "P@ssw0rd!" passwordConfirmation: "P@ssw0rd!" }) { sid expiry } }`, &resp)
 	assert.NotEmpty(suite.T(), resp.CreateUser.Sid)
 	assert.NotEmpty(suite.T(), resp.CreateUser.Expiry)
