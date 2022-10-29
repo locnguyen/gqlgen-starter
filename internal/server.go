@@ -25,7 +25,7 @@ func StartServer() {
 	logger.Info().Msgf("\tBuild Time: %s", build.BuildTime)
 	logger.Info().Msg("******************************************")
 
-	conn, entClient, err := db.OpenConnection(logger)
+	conn, entClient, err := db.OpenConnection(logger, config.Application.DatabaseURL)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("NO DATABASE CONNECTION")
 	}
