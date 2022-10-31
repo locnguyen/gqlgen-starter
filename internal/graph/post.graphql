@@ -3,6 +3,8 @@ type Post {
     content: String!
     createTime: Time!
     updateTime: Time!
+
+    author: User!
 }
 
 input CreatePostInput {

@@ -5,9 +5,10 @@ package resolvers
 
 import (
 	"context"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 	"gqlgen-starter/internal/ent"
 	"gqlgen-starter/internal/middleware"
+
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // Viewer is the resolver for the viewer field.
