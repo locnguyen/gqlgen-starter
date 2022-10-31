@@ -1,4 +1,5 @@
-h1:71kuM1KVj0PrIYtHEro86VlN83rWiR60sZyQIg0WuL0=
+h1:mw3gqBzeDs3gO7UEqiwVVUR4roohiR7eAvV0n9GIPCg=
 20221028032451_create_users.sql h1:UQ/Lw8tUKilnH33uVyINjrNHhPXMcyD9Q3P+LOdnnI0=
 20221028035456_create_sessions.sql h1:4FzaGHjcBBRCw0FCbtbJWXnyBgM5X099FlhbC+uKpw0=
 20221028042447_add_type_to_session.sql h1:BH3HLWq6c/d+QlgKMtoICallGmcf84zfNIc3I/PR9Vs=
+20221029054701_create_posts.sql h1:69X87GBW3TKSKIogUMey1AbPLg3edCFWCkh8ijC7v4s=

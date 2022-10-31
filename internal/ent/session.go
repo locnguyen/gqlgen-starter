@@ -17,6 +17,12 @@ type Session struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// CreateTime holds the value of the "create_time" field.
+	CreateTime time.Time `json:"create_time,omitempty"`
+	// UpdateTime holds the value of the "update_time" field.
+	UpdateTime time.Time `json:"update_time,omitempty"`
+	// UserID holds the value of the "user_id" field.
+	UserID int64 `json:"user_id,omitempty"`
 	// Sid holds the value of the "sid" field.
 	Sid string `json:"sid,omitempty"`
 	// Expiry holds the value of the "expiry" field.
@@ -27,8 +33,7 @@ type Session struct {
 	Type session.Type `json:"type,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SessionQuery when eager-loading is set.
-	Edges         SessionEdges `json:"edges"`
-	user_sessions *int64
+	Edges SessionEdges `json:"edges"`
 }
 
 // SessionEdges holds the relations/edges for other nodes in the graph.
@@ -60,14 +65,12 @@ func (*Session) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case session.FieldDeleted:
 			values[i] = new(sql.NullBool)
-		case session.FieldID:
+		case session.FieldID, session.FieldUserID:
 			values[i] = new(sql.NullInt64)
 		case session.FieldSid, session.FieldType:
 			values[i] = new(sql.NullString)
-		case session.FieldExpiry:
+		case session.FieldCreateTime, session.FieldUpdateTime, session.FieldExpiry:
 			values[i] = new(sql.NullTime)
-		case session.ForeignKeys[0]: // user_sessions
-			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Session", columns[i])
 		}
@@ -89,6 +92,24 @@ func (s *Session) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			s.ID = int(value.Int64)
+		case session.FieldCreateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field create_time", values[i])
+			} else if value.Valid {
+				s.CreateTime = value.Time
+			}
+		case session.FieldUpdateTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field update_time", values[i])
+			} else if value.Valid {
+				s.UpdateTime = value.Time
+			}
+		case session.FieldUserID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field user_id", values[i])
+			} else if value.Valid {
+				s.UserID = value.Int64
+			}
 		case session.FieldSid:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field sid", values[i])
@@ -112,13 +133,6 @@ func (s *Session) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
 				s.Type = session.Type(value.String)
-			}
-		case session.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_sessions", value)
-			} else if value.Valid {
-				s.user_sessions = new(int64)
-				*s.user_sessions = int64(value.Int64)
 			}
 		}
 	}
@@ -153,6 +167,15 @@ func (s *Session) String() string {
 	var builder strings.Builder
 	builder.WriteString("Session(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", s.ID))
+	builder.WriteString("create_time=")
+	builder.WriteString(s.CreateTime.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("update_time=")
+	builder.WriteString(s.UpdateTime.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("user_id=")
+	builder.WriteString(fmt.Sprintf("%v", s.UserID))
+	builder.WriteString(", ")
 	builder.WriteString("sid=")
 	builder.WriteString(s.Sid)
 	builder.WriteString(", ")

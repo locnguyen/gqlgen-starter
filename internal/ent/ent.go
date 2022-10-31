@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"gqlgen-starter/internal/ent/post"
 	"gqlgen-starter/internal/ent/session"
 	"gqlgen-starter/internal/ent/user"
 
@@ -32,6 +33,7 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
+		post.Table:    post.ValidColumn,
 		session.Table: session.ValidColumn,
 		user.Table:    user.ValidColumn,
 	}

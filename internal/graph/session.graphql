@@ -2,3 +2,7 @@ type Session {
     sid: String!
     expiry: Time!
 }
+
+extend type Query {
+    viewer: User
+}

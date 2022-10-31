@@ -29,6 +29,18 @@ func (su *SessionUpdate) Where(ps ...predicate.Session) *SessionUpdate {
 	return su
 }
 
+// SetUpdateTime sets the "update_time" field.
+func (su *SessionUpdate) SetUpdateTime(t time.Time) *SessionUpdate {
+	su.mutation.SetUpdateTime(t)
+	return su
+}
+
+// SetUserID sets the "user_id" field.
+func (su *SessionUpdate) SetUserID(i int64) *SessionUpdate {
+	su.mutation.SetUserID(i)
+	return su
+}
+
 // SetSid sets the "sid" field.
 func (su *SessionUpdate) SetSid(s string) *SessionUpdate {
 	su.mutation.SetSid(s)
@@ -61,20 +73,6 @@ func (su *SessionUpdate) SetType(s session.Type) *SessionUpdate {
 	return su
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (su *SessionUpdate) SetUserID(id int64) *SessionUpdate {
-	su.mutation.SetUserID(id)
-	return su
-}
-
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (su *SessionUpdate) SetNillableUserID(id *int64) *SessionUpdate {
-	if id != nil {
-		su = su.SetUserID(*id)
-	}
-	return su
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (su *SessionUpdate) SetUser(u *User) *SessionUpdate {
 	return su.SetUserID(u.ID)
@@ -97,6 +95,7 @@ func (su *SessionUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
+	su.defaults()
 	if len(su.hooks) == 0 {
 		if err = su.check(); err != nil {
 			return 0, err
@@ -151,6 +150,14 @@ func (su *SessionUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (su *SessionUpdate) defaults() {
+	if _, ok := su.mutation.UpdateTime(); !ok {
+		v := session.UpdateDefaultUpdateTime()
+		su.mutation.SetUpdateTime(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (su *SessionUpdate) check() error {
 	if v, ok := su.mutation.Sid(); ok {
@@ -162,6 +169,9 @@ func (su *SessionUpdate) check() error {
 		if err := session.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Session.type": %w`, err)}
 		}
+	}
+	if _, ok := su.mutation.UserID(); su.mutation.UserCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Session.user"`)
 	}
 	return nil
 }
@@ -183,6 +193,13 @@ func (su *SessionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := su.mutation.UpdateTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: session.FieldUpdateTime,
+		})
 	}
 	if value, ok := su.mutation.Sid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -266,6 +283,18 @@ type SessionUpdateOne struct {
 	mutation *SessionMutation
 }
 
+// SetUpdateTime sets the "update_time" field.
+func (suo *SessionUpdateOne) SetUpdateTime(t time.Time) *SessionUpdateOne {
+	suo.mutation.SetUpdateTime(t)
+	return suo
+}
+
+// SetUserID sets the "user_id" field.
+func (suo *SessionUpdateOne) SetUserID(i int64) *SessionUpdateOne {
+	suo.mutation.SetUserID(i)
+	return suo
+}
+
 // SetSid sets the "sid" field.
 func (suo *SessionUpdateOne) SetSid(s string) *SessionUpdateOne {
 	suo.mutation.SetSid(s)
@@ -298,20 +327,6 @@ func (suo *SessionUpdateOne) SetType(s session.Type) *SessionUpdateOne {
 	return suo
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (suo *SessionUpdateOne) SetUserID(id int64) *SessionUpdateOne {
-	suo.mutation.SetUserID(id)
-	return suo
-}
-
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (suo *SessionUpdateOne) SetNillableUserID(id *int64) *SessionUpdateOne {
-	if id != nil {
-		suo = suo.SetUserID(*id)
-	}
-	return suo
-}
-
 // SetUser sets the "user" edge to the User entity.
 func (suo *SessionUpdateOne) SetUser(u *User) *SessionUpdateOne {
 	return suo.SetUserID(u.ID)
@@ -341,6 +356,7 @@ func (suo *SessionUpdateOne) Save(ctx context.Context) (*Session, error) {
 		err  error
 		node *Session
 	)
+	suo.defaults()
 	if len(suo.hooks) == 0 {
 		if err = suo.check(); err != nil {
 			return nil, err
@@ -401,6 +417,14 @@ func (suo *SessionUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (suo *SessionUpdateOne) defaults() {
+	if _, ok := suo.mutation.UpdateTime(); !ok {
+		v := session.UpdateDefaultUpdateTime()
+		suo.mutation.SetUpdateTime(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (suo *SessionUpdateOne) check() error {
 	if v, ok := suo.mutation.Sid(); ok {
@@ -412,6 +436,9 @@ func (suo *SessionUpdateOne) check() error {
 		if err := session.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Session.type": %w`, err)}
 		}
+	}
+	if _, ok := suo.mutation.UserID(); suo.mutation.UserCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Session.user"`)
 	}
 	return nil
 }
@@ -450,6 +477,13 @@ func (suo *SessionUpdateOne) sqlSave(ctx context.Context) (_node *Session, err e
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := suo.mutation.UpdateTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: session.FieldUpdateTime,
+		})
 	}
 	if value, ok := suo.mutation.Sid(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{

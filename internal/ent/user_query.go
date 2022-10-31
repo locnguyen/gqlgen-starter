@@ -6,6 +6,7 @@ import (
 	"context"
 	"database/sql/driver"
 	"fmt"
+	"gqlgen-starter/internal/ent/post"
 	"gqlgen-starter/internal/ent/predicate"
 	"gqlgen-starter/internal/ent/session"
 	"gqlgen-starter/internal/ent/user"
@@ -26,6 +27,7 @@ type UserQuery struct {
 	fields       []string
 	predicates   []predicate.User
 	withSessions *SessionQuery
+	withPosts    *PostQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -77,6 +79,28 @@ func (uq *UserQuery) QuerySessions() *SessionQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(session.Table, session.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.SessionsTable, user.SessionsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPosts chains the current query on the "posts" edge.
+func (uq *UserQuery) QueryPosts() *PostQuery {
+	query := &PostQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(post.Table, post.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.PostsTable, user.PostsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -266,6 +290,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		order:        append([]OrderFunc{}, uq.order...),
 		predicates:   append([]predicate.User{}, uq.predicates...),
 		withSessions: uq.withSessions.Clone(),
+		withPosts:    uq.withPosts.Clone(),
 		// clone intermediate query.
 		sql:    uq.sql.Clone(),
 		path:   uq.path,
@@ -281,6 +306,17 @@ func (uq *UserQuery) WithSessions(opts ...func(*SessionQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withSessions = query
+	return uq
+}
+
+// WithPosts tells the query-builder to eager-load the nodes that are connected to
+// the "posts" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithPosts(opts ...func(*PostQuery)) *UserQuery {
+	query := &PostQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withPosts = query
 	return uq
 }
 
@@ -352,8 +388,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			uq.withSessions != nil,
+			uq.withPosts != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -381,6 +418,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 			return nil, err
 		}
 	}
+	if query := uq.withPosts; query != nil {
+		if err := uq.loadPosts(ctx, query, nodes,
+			func(n *User) { n.Edges.Posts = []*Post{} },
+			func(n *User, e *Post) { n.Edges.Posts = append(n.Edges.Posts, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -394,7 +438,6 @@ func (uq *UserQuery) loadSessions(ctx context.Context, query *SessionQuery, node
 			init(nodes[i])
 		}
 	}
-	query.withFKs = true
 	query.Where(predicate.Session(func(s *sql.Selector) {
 		s.Where(sql.InValues(user.SessionsColumn, fks...))
 	}))
@@ -403,13 +446,37 @@ func (uq *UserQuery) loadSessions(ctx context.Context, query *SessionQuery, node
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.user_sessions
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "user_sessions" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		fk := n.UserID
+		node, ok := nodeids[fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "user_sessions" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "user_id" returned %v for node %v`, fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadPosts(ctx context.Context, query *PostQuery, nodes []*User, init func(*User), assign func(*User, *Post)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int64]*User)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.Where(predicate.Post(func(s *sql.Selector) {
+		s.Where(sql.InValues(user.PostsColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.AuthorID
+		node, ok := nodeids[fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "author_id" returned %v for node %v`, fk, n.ID)
 		}
 		assign(node, n)
 	}

@@ -4,6 +4,7 @@ package session
 
 import (
 	"fmt"
+	"time"
 )
 
 const (
@@ -11,6 +12,12 @@ const (
 	Label = "session"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldCreateTime holds the string denoting the create_time field in the database.
+	FieldCreateTime = "create_time"
+	// FieldUpdateTime holds the string denoting the update_time field in the database.
+	FieldUpdateTime = "update_time"
+	// FieldUserID holds the string denoting the user_id field in the database.
+	FieldUserID = "user_id"
 	// FieldSid holds the string denoting the sid field in the database.
 	FieldSid = "sid"
 	// FieldExpiry holds the string denoting the expiry field in the database.
@@ -29,22 +36,19 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
-	UserColumn = "user_sessions"
+	UserColumn = "user_id"
 )
 
 // Columns holds all SQL columns for session fields.
 var Columns = []string{
 	FieldID,
+	FieldCreateTime,
+	FieldUpdateTime,
+	FieldUserID,
 	FieldSid,
 	FieldExpiry,
 	FieldDeleted,
 	FieldType,
-}
-
-// ForeignKeys holds the SQL foreign-keys that are owned by the "sessions"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"user_sessions",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -54,15 +58,16 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
-			return true
-		}
-	}
 	return false
 }
 
 var (
+	// DefaultCreateTime holds the default value on creation for the "create_time" field.
+	DefaultCreateTime func() time.Time
+	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
+	DefaultUpdateTime func() time.Time
+	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
+	UpdateDefaultUpdateTime func() time.Time
 	// SidValidator is a validator for the "sid" field. It is called by the builders before save.
 	SidValidator func(string) error
 	// DefaultDeleted holds the default value on creation for the "deleted" field.

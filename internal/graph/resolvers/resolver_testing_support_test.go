@@ -10,7 +10,10 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 	"gqlgen-starter/db"
 	"gqlgen-starter/internal/app"
+	"gqlgen-starter/internal/ent"
 	"gqlgen-starter/internal/graph/generated"
+	"gqlgen-starter/internal/middleware"
+	"net/http/httptest"
 	"os"
 	"testing"
 )
@@ -21,11 +24,24 @@ type TestContext struct {
 	pgContainer  testcontainers.Container
 }
 
-func InitTestContext(t *testing.T) *TestContext {
+// In the real server a ContextCookie is always created in the CookieAuth middleware
+// In unit tests this does not happen upstream, so we need to provide it
+func AddContextCookieForTesting(user *ent.User) client.Option {
+	return func(bd *client.Request) {
+		ctxCookie := &middleware.ContextCookie{
+			User:   user,
+			Writer: httptest.NewRecorder(),
+		}
+		ctx := context.WithValue(context.Background(), middleware.CookieCtxKey, ctxCookie)
+		bd.HTTP = bd.HTTP.WithContext(ctx)
+	}
+}
+
+func InitTestContext(t *testing.T, testName string) *TestContext {
 	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout})
 	ctx := context.Background()
 
-	postgresC, databaseURL, err := StartPgContainer(&logger, "user_test_db")
+	postgresC, databaseURL, err := StartPgContainer(&logger, fmt.Sprintf("%s_db", testName))
 	if err != nil {
 		t.Error(err)
 	}

@@ -21,6 +21,40 @@ type SessionCreate struct {
 	hooks    []Hook
 }
 
+// SetCreateTime sets the "create_time" field.
+func (sc *SessionCreate) SetCreateTime(t time.Time) *SessionCreate {
+	sc.mutation.SetCreateTime(t)
+	return sc
+}
+
+// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
+func (sc *SessionCreate) SetNillableCreateTime(t *time.Time) *SessionCreate {
+	if t != nil {
+		sc.SetCreateTime(*t)
+	}
+	return sc
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (sc *SessionCreate) SetUpdateTime(t time.Time) *SessionCreate {
+	sc.mutation.SetUpdateTime(t)
+	return sc
+}
+
+// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
+func (sc *SessionCreate) SetNillableUpdateTime(t *time.Time) *SessionCreate {
+	if t != nil {
+		sc.SetUpdateTime(*t)
+	}
+	return sc
+}
+
+// SetUserID sets the "user_id" field.
+func (sc *SessionCreate) SetUserID(i int64) *SessionCreate {
+	sc.mutation.SetUserID(i)
+	return sc
+}
+
 // SetSid sets the "sid" field.
 func (sc *SessionCreate) SetSid(s string) *SessionCreate {
 	sc.mutation.SetSid(s)
@@ -50,20 +84,6 @@ func (sc *SessionCreate) SetNillableDeleted(b *bool) *SessionCreate {
 // SetType sets the "type" field.
 func (sc *SessionCreate) SetType(s session.Type) *SessionCreate {
 	sc.mutation.SetType(s)
-	return sc
-}
-
-// SetUserID sets the "user" edge to the User entity by ID.
-func (sc *SessionCreate) SetUserID(id int64) *SessionCreate {
-	sc.mutation.SetUserID(id)
-	return sc
-}
-
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (sc *SessionCreate) SetNillableUserID(id *int64) *SessionCreate {
-	if id != nil {
-		sc = sc.SetUserID(*id)
-	}
 	return sc
 }
 
@@ -149,6 +169,14 @@ func (sc *SessionCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (sc *SessionCreate) defaults() {
+	if _, ok := sc.mutation.CreateTime(); !ok {
+		v := session.DefaultCreateTime()
+		sc.mutation.SetCreateTime(v)
+	}
+	if _, ok := sc.mutation.UpdateTime(); !ok {
+		v := session.DefaultUpdateTime()
+		sc.mutation.SetUpdateTime(v)
+	}
 	if _, ok := sc.mutation.Deleted(); !ok {
 		v := session.DefaultDeleted
 		sc.mutation.SetDeleted(v)
@@ -157,6 +185,15 @@ func (sc *SessionCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (sc *SessionCreate) check() error {
+	if _, ok := sc.mutation.CreateTime(); !ok {
+		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "Session.create_time"`)}
+	}
+	if _, ok := sc.mutation.UpdateTime(); !ok {
+		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Session.update_time"`)}
+	}
+	if _, ok := sc.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Session.user_id"`)}
+	}
 	if _, ok := sc.mutation.Sid(); !ok {
 		return &ValidationError{Name: "sid", err: errors.New(`ent: missing required field "Session.sid"`)}
 	}
@@ -178,6 +215,9 @@ func (sc *SessionCreate) check() error {
 		if err := session.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Session.type": %w`, err)}
 		}
+	}
+	if _, ok := sc.mutation.UserID(); !ok {
+		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Session.user"`)}
 	}
 	return nil
 }
@@ -206,6 +246,22 @@ func (sc *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+	if value, ok := sc.mutation.CreateTime(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: session.FieldCreateTime,
+		})
+		_node.CreateTime = value
+	}
+	if value, ok := sc.mutation.UpdateTime(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: session.FieldUpdateTime,
+		})
+		_node.UpdateTime = value
+	}
 	if value, ok := sc.mutation.Sid(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -255,7 +311,7 @@ func (sc *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.user_sessions = &nodes[0]
+		_node.UserID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

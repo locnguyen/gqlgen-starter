@@ -11,11 +11,13 @@ import (
 	"gqlgen-starter/internal/ent/session"
 	"gqlgen-starter/internal/graph/generated"
 	"gqlgen-starter/internal/graph/model"
+	"gqlgen-starter/internal/middleware"
 	"math/rand"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/vektah/gqlparser/v2/gqlerror"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -55,6 +57,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 		r.Logger.Err(err).Msg("Error creating session")
 		return nil, err
 	}
+
 	sid := base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(randomBytes)
 
 	sess, err := r.EntClient.Session.Create().
@@ -65,6 +68,9 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 		Save(ctx)
 
 	r.Logger.Debug().Interface("session", sess).Msg("Created user then session")
+
+	ctxCookie := ctx.Value(middleware.CookieCtxKey).(*middleware.ContextCookie)
+	ctxCookie.SetSession(sess)
 
 	return sess, nil
 }
@@ -81,6 +87,9 @@ func (r *queryResolver) User(ctx context.Context, id string) (*ent.User, error) 
 	u, err := r.EntClient.User.Get(ctx, id64)
 
 	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, gqlerror.Errorf("User not found")
+		}
 		r.Logger.Err(err).Msgf("Error while querying for user=%s", id)
 		return nil, err
 	}
@@ -89,7 +98,7 @@ func (r *queryResolver) User(ctx context.Context, id string) (*ent.User, error) 
 		Str("query", "user(id: ID!)").
 		Str("id", id).
 		Interface("result", u).
-		Msg("Querying for user")
+		Msg("Queried for user")
 	return u, nil
 }
 

@@ -11,6 +11,7 @@ import (
 	"gqlgen-starter/internal/app"
 	"gqlgen-starter/internal/graph/generated"
 	"gqlgen-starter/internal/graph/resolvers"
+	"gqlgen-starter/internal/middleware"
 	"net/http"
 	"os"
 	"time"
@@ -41,7 +42,7 @@ func StartServer() {
 		logger.Info().Msgf("connect to http://localhost:%s/ for GraphQL playground", config.Application.ServerPort)
 	}
 
-	http.Handle("/query", srv)
+	http.Handle("/query", middleware.AuthCookie(appCtx, srv))
 
 	logger.Info().Msgf("Starting GraphQL API Server at :%s 🚀", config.Application.ServerPort)
 	if err = http.ListenAndServe(fmt.Sprintf(":%s", config.Application.ServerPort), nil); err != nil {

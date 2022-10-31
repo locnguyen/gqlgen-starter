@@ -2,6 +2,10 @@
 
 package model
 
+type CreatePostInput struct {
+	Content string `json:"content"`
+}
+
 type CreateUserInput struct {
 	FirstName            string `json:"firstName"`
 	LastName             string `json:"lastName"`
