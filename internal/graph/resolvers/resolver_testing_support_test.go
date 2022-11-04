@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/go-faker/faker/v4"
 	"github.com/rs/zerolog"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
+	"golang.org/x/crypto/bcrypt"
 	"gqlgen-starter/db"
 	"gqlgen-starter/internal/app"
 	"gqlgen-starter/internal/ent"
@@ -26,11 +28,12 @@ type TestContext struct {
 
 // In the real server a ContextCookie is always created in the CookieAuth middleware
 // In unit tests this does not happen upstream, so we need to provide it
-func AddContextCookieForTesting(user *ent.User) client.Option {
+func AddContextCookieForTesting(user *ent.User, sid *string) client.Option {
 	return func(bd *client.Request) {
 		ctxCookie := &middleware.ContextCookie{
 			User:   user,
 			Writer: httptest.NewRecorder(),
+			Sid:    sid,
 		}
 		ctx := context.WithValue(context.Background(), middleware.CookieCtxKey, ctxCookie)
 		bd.HTTP = bd.HTTP.WithContext(ctx)
@@ -101,4 +104,24 @@ func StartPgContainer(logger testcontainers.Logging, containerName string) (test
 	databaseURL := fmt.Sprintf("postgres://postgres:postgres@localhost:%s/test?sslmode=disable", mappedPort.Port())
 
 	return postgresC, &databaseURL, nil
+}
+
+func CreateDummyUser(t *testing.T, client ent.Client) (*ent.User, string) {
+	pw := faker.Password()
+	hashedPw, err := bcrypt.GenerateFromPassword([]byte(pw), bcrypt.DefaultCost)
+	if err != nil {
+		t.Error(err)
+	}
+	u, err := client.User.Create().
+		SetEmail(faker.Email()).
+		SetFirstName(faker.FirstName()).
+		SetLastName(faker.LastName()).
+		SetHashedPassword(hashedPw).
+		SetPhoneNumber(faker.Phonenumber()).
+		Save(context.Background())
+
+	if err != nil {
+		t.Error(err)
+	}
+	return u, pw
 }

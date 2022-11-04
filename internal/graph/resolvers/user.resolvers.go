@@ -5,14 +5,13 @@ package resolvers
 
 import (
 	"context"
+	"crypto/rand"
 	"encoding/base32"
-	"errors"
 	"gqlgen-starter/internal/ent"
 	"gqlgen-starter/internal/ent/session"
 	"gqlgen-starter/internal/graph/generated"
 	"gqlgen-starter/internal/graph/model"
 	"gqlgen-starter/internal/middleware"
-	"math/rand"
 	"strconv"
 	"strings"
 	"time"
@@ -24,10 +23,10 @@ import (
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUserInput) (*ent.Session, error) {
 	if input.Password != input.PasswordConfirmation {
-		return nil, errors.New("Password confirmation does not match password")
+		return nil, gqlerror.Errorf("Password confirmation does not match password")
 	}
 
-	hashedPw, err := bcrypt.GenerateFromPassword([]byte(input.Password), 12)
+	hashedPw, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	if err != nil {
 		r.Logger.Err(err).Msg("Error generating password")
 		return nil, err
@@ -68,7 +67,6 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 		Save(ctx)
 
 	r.Logger.Debug().Interface("session", sess).Msg("Created user then session")
-
 	ctxCookie := ctx.Value(middleware.CookieCtxKey).(*middleware.ContextCookie)
 	ctxCookie.SetSession(sess)
 

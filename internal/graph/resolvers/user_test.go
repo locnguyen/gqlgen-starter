@@ -30,14 +30,16 @@ func (suite *UserResolverSuite) TearDownSuite() {
 	defer suite.AppCtx.DB.Close()
 }
 
+type UserObj struct {
+	ID          string `json:"id"`
+	FirstName   string `json:"firstName"`
+	LastName    string `json:"lastName"`
+	PhoneNumber string `json:"phoneNumber"`
+	Email       string `json:"email"`
+}
+
 type userResp struct {
-	User *struct {
-		ID          string `json:"id"`
-		FirstName   string `json:"firstName"`
-		LastName    string `json:"lastName"`
-		PhoneNumber string `json:"phoneNumber"`
-		Email       string `json:"email"`
-	}
+	User *UserObj
 }
 
 var getUserQuery = `
@@ -92,7 +94,7 @@ func (suite *UserResolverSuite) TestCreateUserMutation() {
 			Expiry string `json:"expiry"`
 		}
 	}
-	suite.GqlGenClient.MustPost(`mutation { createUser(input: { firstName: "Natasha" lastName: "Romanova" email: "blackwidow@avengers.com" phoneNumber: "+8888888888" password: "P@ssw0rd!" passwordConfirmation: "P@ssw0rd!" }) { sid expiry } }`, &resp, AddContextCookieForTesting(nil))
+	suite.GqlGenClient.MustPost(`mutation { createUser(input: { firstName: "Natasha" lastName: "Romanova" email: "blackwidow@avengers.com" phoneNumber: "+8888888888" password: "P@ssw0rd!" passwordConfirmation: "P@ssw0rd!" }) { sid expiry } }`, &resp, AddContextCookieForTesting(nil, nil))
 	assert.NotEmpty(suite.T(), resp.CreateUser.Sid)
 	assert.NotEmpty(suite.T(), resp.CreateUser.Expiry)
 

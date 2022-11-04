@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"gqlgen-starter/internal/ent"
+	"net/http/httptest"
 	"testing"
 	"time"
 )
@@ -22,6 +23,19 @@ func (suite *CookieAuthSuite) TestGetContextUserExpired() {
 	ctx := context.WithValue(context.Background(), CookieCtxKey, &ContextCookie{User: nil})
 	_, err := GetContextUser(ctx)
 	assert.ErrorContains(suite.T(), err, "Session expired")
+}
+
+func (suite *CookieAuthSuite) TestSetCookie() {
+	s := &ent.Session{
+		Sid:    faker.UUIDHyphenated(),
+		Expiry: time.Now(),
+	}
+
+	ctxCookie := &ContextCookie{Writer: httptest.NewRecorder()}
+	ctxCookie.SetSession(s)
+	cookieHeader := ctxCookie.Writer.Header().Get("Set-Cookie")
+	assert.NotEmpty(suite.T(), cookieHeader)
+	assert.Contains(suite.T(), cookieHeader, s.Sid)
 }
 
 func (suite *CookieAuthSuite) TestGetContextUser() {

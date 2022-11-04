@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"crypto/sha256"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
@@ -30,7 +29,7 @@ const CtxAuthTokenID CtxAuthTokenIDKey = "requestAuthTokenID"
 type ContextCookie struct {
 	Writer http.ResponseWriter
 	User   *ent.User
-	Token  [32]byte
+	Sid    *string
 }
 
 func (this *ContextCookie) SetSession(ses *ent.Session) {
@@ -83,7 +82,7 @@ func AuthCookie(env *app.AppContext, next http.Handler) http.HandlerFunc {
 			return
 		}
 		ctxCookie.User = u
-		ctxCookie.Token = sha256.Sum256([]byte(c.Value))
+		ctxCookie.Sid = &c.Value
 
 		r = r.WithContext(context.WithValue(r.Context(), CtxAuthTokenID, s.ID))
 		next.ServeHTTP(w, r)

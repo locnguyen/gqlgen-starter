@@ -7,7 +7,6 @@ import (
 	"github.com/go-faker/faker/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gqlgen-starter/internal/ent"
 	"testing"
 )
 
@@ -64,7 +63,7 @@ type postResp struct {
 }
 
 func (suite *PostResolverSuite) TestGetPostQuery() {
-	u := CreateDummyUser(suite)
+	u, _ := CreateDummyUser(suite.T(), *suite.AppCtx.EntClient)
 
 	p, err := suite.AppCtx.EntClient.Post.Create().
 		SetAuthor(u).
@@ -114,7 +113,7 @@ func (suite *PostResolverSuite) TestCreatePostMutation() {
 		CreatePost PostObj `json:"createPost"`
 	}
 
-	author := CreateDummyUser(suite)
+	author, _ := CreateDummyUser(suite.T(), *suite.AppCtx.EntClient)
 	content := faker.Paragraph()
 	type input struct {
 		Content string `json:"content"`
@@ -123,25 +122,10 @@ func (suite *PostResolverSuite) TestCreatePostMutation() {
 		Content: content,
 	}
 
-	suite.GqlGenClient.MustPost(q, &resp, client.Var("input", i), AddContextCookieForTesting(author))
+	suite.GqlGenClient.MustPost(q, &resp, client.Var("input", i), AddContextCookieForTesting(author, nil))
 
 	assert.NotEmpty(suite.T(), resp.CreatePost.ID)
 	assert.Equal(suite.T(), content, resp.CreatePost.Content)
 	assert.NotEmpty(suite.T(), resp.CreatePost.CreateTime)
 	assert.NotEmpty(suite.T(), resp.CreatePost.UpdateTime)
-}
-
-func CreateDummyUser(suite *PostResolverSuite) *ent.User {
-	u, err := suite.AppCtx.EntClient.User.Create().
-		SetEmail(faker.Email()).
-		SetFirstName(faker.FirstName()).
-		SetLastName(faker.LastName()).
-		SetHashedPassword([]byte(faker.Password())).
-		SetPhoneNumber(faker.Phonenumber()).
-		Save(context.Background())
-
-	if err != nil {
-		suite.T().Error(err)
-	}
-	return u
 }
