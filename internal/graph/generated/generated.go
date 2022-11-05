@@ -73,7 +73,7 @@ type ComplexityRoot struct {
 
 	Session struct {
 		Expiry func(childComplexity int) int
-		Sid    func(childComplexity int) int
+		Token  func(childComplexity int) int
 	}
 
 	User struct {
@@ -91,7 +91,7 @@ type MutationResolver interface {
 	Hello(ctx context.Context) (string, error)
 	CreatePost(ctx context.Context, input model.CreatePostInput) (*ent.Post, error)
 	CreateSession(ctx context.Context, input model.CreateSessionInput) (*ent.Session, error)
-	DeleteSession(ctx context.Context) (*ent.Session, error)
+	DeleteSession(ctx context.Context) (bool, error)
 	CreateUser(ctx context.Context, input model.CreateUserInput) (*ent.Session, error)
 }
 type PostResolver interface {
@@ -254,12 +254,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Session.Expiry(childComplexity), true
 
-	case "Session.sid":
-		if e.complexity.Session.Sid == nil {
+	case "Session.token":
+		if e.complexity.Session.Token == nil {
 			break
 		}
 
-		return e.complexity.Session.Sid(childComplexity), true
+		return e.complexity.Session.Token(childComplexity), true
 
 	case "User.createTime":
 		if e.complexity.User.CreateTime == nil {
@@ -416,7 +416,7 @@ type Mutation {
 }
 `, BuiltIn: false},
 	{Name: "../session.graphql", Input: `type Session {
-    sid: String!
+    token: String!
     expiry: Time!
 }
 
@@ -431,7 +431,7 @@ extend type Query {
 
 extend type Mutation {
     createSession(input: CreateSessionInput!): Session!
-    deleteSession: Session!
+    deleteSession: Boolean!
 }`, BuiltIn: false},
 	{Name: "../user.graphql", Input: `type User {
     id: ID!
@@ -744,8 +744,8 @@ func (ec *executionContext) fieldContext_Mutation_createSession(ctx context.Cont
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "sid":
-				return ec.fieldContext_Session_sid(ctx, field)
+			case "token":
+				return ec.fieldContext_Session_token(ctx, field)
 			case "expiry":
 				return ec.fieldContext_Session_expiry(ctx, field)
 			}
@@ -792,9 +792,9 @@ func (ec *executionContext) _Mutation_deleteSession(ctx context.Context, field g
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*ent.Session)
+	res := resTmp.(bool)
 	fc.Result = res
-	return ec.marshalNSession2ᚖgqlgenᚑstarterᚋinternalᚋentᚐSession(ctx, field.Selections, res)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteSession(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -804,13 +804,7 @@ func (ec *executionContext) fieldContext_Mutation_deleteSession(ctx context.Cont
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "sid":
-				return ec.fieldContext_Session_sid(ctx, field)
-			case "expiry":
-				return ec.fieldContext_Session_expiry(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Session", field.Name)
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	return fc, nil
@@ -855,8 +849,8 @@ func (ec *executionContext) fieldContext_Mutation_createUser(ctx context.Context
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "sid":
-				return ec.fieldContext_Session_sid(ctx, field)
+			case "token":
+				return ec.fieldContext_Session_token(ctx, field)
 			case "expiry":
 				return ec.fieldContext_Session_expiry(ctx, field)
 			}
@@ -1478,8 +1472,8 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Session_sid(ctx context.Context, field graphql.CollectedField, obj *ent.Session) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Session_sid(ctx, field)
+func (ec *executionContext) _Session_token(ctx context.Context, field graphql.CollectedField, obj *ent.Session) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Session_token(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1492,7 +1486,7 @@ func (ec *executionContext) _Session_sid(ctx context.Context, field graphql.Coll
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Sid, nil
+		return obj.Token, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1509,7 +1503,7 @@ func (ec *executionContext) _Session_sid(ctx context.Context, field graphql.Coll
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Session_sid(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Session_token(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Session",
 		Field:      field,
@@ -4082,9 +4076,9 @@ func (ec *executionContext) _Session(ctx context.Context, sel ast.SelectionSet, 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Session")
-		case "sid":
+		case "token":
 
-			out.Values[i] = ec._Session_sid(ctx, field, obj)
+			out.Values[i] = ec._Session_token(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				invalids++

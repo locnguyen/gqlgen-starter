@@ -122,7 +122,7 @@ func (suite *PostResolverSuite) TestCreatePostMutation() {
 		Content: content,
 	}
 
-	suite.GqlGenClient.MustPost(q, &resp, client.Var("input", i), AddContextCookieForTesting(author, nil))
+	suite.GqlGenClient.MustPost(q, &resp, client.Var("input", i), AddContextUserForTesting(author, nil))
 
 	assert.NotEmpty(suite.T(), resp.CreatePost.ID)
 	assert.Equal(suite.T(), content, resp.CreatePost.Content)

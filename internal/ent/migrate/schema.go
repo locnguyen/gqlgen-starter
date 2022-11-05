@@ -33,25 +33,20 @@ var (
 	// SessionsColumns holds the columns for the "sessions" table.
 	SessionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "create_time", Type: field.TypeTime},
-		{Name: "update_time", Type: field.TypeTime},
-		{Name: "sid", Type: field.TypeString, Unique: true},
+		{Name: "token", Type: field.TypeString, Unique: true},
+		{Name: "data", Type: field.TypeBytes},
 		{Name: "expiry", Type: field.TypeTime},
-		{Name: "deleted", Type: field.TypeBool, Default: false},
-		{Name: "type", Type: field.TypeEnum, Enums: []string{"general", "single_use"}},
-		{Name: "user_id", Type: field.TypeInt64},
 	}
 	// SessionsTable holds the schema information for the "sessions" table.
 	SessionsTable = &schema.Table{
 		Name:       "sessions",
 		Columns:    SessionsColumns,
 		PrimaryKey: []*schema.Column{SessionsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
+		Indexes: []*schema.Index{
 			{
-				Symbol:     "sessions_users_sessions",
-				Columns:    []*schema.Column{SessionsColumns[7]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.NoAction,
+				Name:    "session_expiry",
+				Unique:  false,
+				Columns: []*schema.Column{SessionsColumns[3]},
 			},
 		},
 	}
@@ -89,5 +84,4 @@ var (
 
 func init() {
 	PostsTable.ForeignKeys[0].RefTable = UsersTable
-	SessionsTable.ForeignKeys[0].RefTable = UsersTable
 }

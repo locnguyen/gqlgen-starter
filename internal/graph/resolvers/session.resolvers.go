@@ -5,17 +5,12 @@ package resolvers
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/base32"
+	"github.com/vektah/gqlparser/v2/gqlerror"
+	"golang.org/x/crypto/bcrypt"
 	"gqlgen-starter/internal/ent"
-	"gqlgen-starter/internal/ent/session"
 	"gqlgen-starter/internal/ent/user"
 	"gqlgen-starter/internal/graph/model"
 	"gqlgen-starter/internal/middleware"
-	"time"
-
-	"github.com/vektah/gqlparser/v2/gqlerror"
-	"golang.org/x/crypto/bcrypt"
 )
 
 // CreateSession is the resolver for the createSession field.
@@ -25,65 +20,41 @@ func (r *mutationResolver) CreateSession(ctx context.Context, input model.Create
 		r.Logger.Warn().Str("email", input.Email).Msg("Unable to find user to create session")
 		return nil, gqlerror.Errorf("Invalid credentials")
 	}
-	r.Logger.Debug().Interface("HashedPassword", u.HashedPassword).Msg("user's hashed password")
 	if err = bcrypt.CompareHashAndPassword(u.HashedPassword, []byte(input.Password)); err != nil {
 		r.Logger.Error().Err(err).Str("email", input.Email).Msg("Unable to verify password")
 		return nil, gqlerror.Errorf("Invalid credentials")
 	}
 
-	randomBytes := make([]byte, 16)
-	_, err = rand.Read(randomBytes)
+	err = r.AppContext.SessionManager.RenewToken(ctx)
+
 	if err != nil {
-		r.Logger.Err(err).Msg("Error creating session")
-		return nil, err
+		r.Logger.Error().Err(err).Msg("Error renewing session token")
+		return nil, gqlerror.Errorf("Error creating session")
 	}
 
-	sid := base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(randomBytes)
+	r.AppContext.SessionManager.Put(ctx, middleware.ContextUserKey, u)
 
-	sess, err := r.EntClient.Session.Create().
-		SetSid(sid).
-		SetExpiry(time.Now().Add(24 * time.Hour)).
-		SetType(session.TypeGeneral).
-		SetUser(u).
-		Save(ctx)
-
-	r.Logger.Debug().Interface("session", sess).Msg("Created session")
-	ctxCookie := ctx.Value(middleware.CookieCtxKey).(*middleware.ContextCookie)
-	ctxCookie.SetSession(sess)
-
-	return sess, nil
+	return &ent.Session{
+		Token:  r.AppContext.SessionManager.Token(ctx),
+		Expiry: r.AppContext.SessionManager.Deadline(ctx),
+	}, nil
 }
 
 // DeleteSession is the resolver for the deleteSession field.
-func (r *mutationResolver) DeleteSession(ctx context.Context) (*ent.Session, error) {
+func (r *mutationResolver) DeleteSession(ctx context.Context) (bool, error) {
 	_, err := middleware.GetContextUser(ctx)
 
 	if err != nil {
 		r.Logger.Warn().Msg("context user not in session context")
-		return nil, err
+		return false, err
 	}
 
-	ctxCookie := ctx.Value(middleware.CookieCtxKey).(*middleware.ContextCookie)
-	ctxCookie.RemoveSession()
-
-	sess, err := r.EntClient.Session.Query().
-		Where(session.And(session.Sid(*ctxCookie.Sid), session.Deleted(false))).
-		Only(ctx)
-
-	if err != nil {
-		r.Logger.Error().Err(err).Str("sid", *ctxCookie.Sid).Msg("Error querying for session")
-		return nil, gqlerror.Errorf("Error finding session to delete")
+	if err := r.SessionManager.Destroy(ctx); err != nil {
+		r.Logger.Error().Err(err).Msg("Error while destroying session")
+		return false, err
 	}
 
-	sess, err = r.EntClient.Session.UpdateOne(sess).SetDeleted(true).Save(ctx)
-
-	if err != nil {
-		r.Logger.Error().Err(err).Str("sid", *ctxCookie.Sid).Msg("Error updating deleted=true for session")
-		return nil, gqlerror.Errorf("Error deleting session")
-	}
-	r.Logger.Debug().Int("sessionId", sess.ID).Msg("Updated session to be deleted")
-
-	return sess, nil
+	return true, nil
 }
 
 // Viewer is the resolver for the viewer field.

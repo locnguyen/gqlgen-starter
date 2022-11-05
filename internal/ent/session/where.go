@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // ID filters vertices based on their ID field.
@@ -81,31 +80,17 @@ func IDLTE(id int) predicate.Session {
 	})
 }
 
-// CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
-func CreateTime(v time.Time) predicate.Session {
+// Token applies equality check predicate on the "token" field. It's identical to TokenEQ.
+func Token(v string) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreateTime), v))
+		s.Where(sql.EQ(s.C(FieldToken), v))
 	})
 }
 
-// UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
-func UpdateTime(v time.Time) predicate.Session {
+// Data applies equality check predicate on the "data" field. It's identical to DataEQ.
+func Data(v []byte) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
-	})
-}
-
-// UserID applies equality check predicate on the "user_id" field. It's identical to UserIDEQ.
-func UserID(v int64) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUserID), v))
-	})
-}
-
-// Sid applies equality check predicate on the "sid" field. It's identical to SidEQ.
-func Sid(v string) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldSid), v))
+		s.Where(sql.EQ(s.C(FieldData), v))
 	})
 }
 
@@ -116,273 +101,166 @@ func Expiry(v time.Time) predicate.Session {
 	})
 }
 
-// Deleted applies equality check predicate on the "deleted" field. It's identical to DeletedEQ.
-func Deleted(v bool) predicate.Session {
+// TokenEQ applies the EQ predicate on the "token" field.
+func TokenEQ(v string) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDeleted), v))
+		s.Where(sql.EQ(s.C(FieldToken), v))
 	})
 }
 
-// CreateTimeEQ applies the EQ predicate on the "create_time" field.
-func CreateTimeEQ(v time.Time) predicate.Session {
+// TokenNEQ applies the NEQ predicate on the "token" field.
+func TokenNEQ(v string) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreateTime), v))
+		s.Where(sql.NEQ(s.C(FieldToken), v))
 	})
 }
 
-// CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
-func CreateTimeNEQ(v time.Time) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCreateTime), v))
-	})
-}
-
-// CreateTimeIn applies the In predicate on the "create_time" field.
-func CreateTimeIn(vs ...time.Time) predicate.Session {
+// TokenIn applies the In predicate on the "token" field.
+func TokenIn(vs ...string) predicate.Session {
 	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldCreateTime), v...))
+		s.Where(sql.In(s.C(FieldToken), v...))
 	})
 }
 
-// CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
-func CreateTimeNotIn(vs ...time.Time) predicate.Session {
+// TokenNotIn applies the NotIn predicate on the "token" field.
+func TokenNotIn(vs ...string) predicate.Session {
 	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldCreateTime), v...))
+		s.Where(sql.NotIn(s.C(FieldToken), v...))
 	})
 }
 
-// CreateTimeGT applies the GT predicate on the "create_time" field.
-func CreateTimeGT(v time.Time) predicate.Session {
+// TokenGT applies the GT predicate on the "token" field.
+func TokenGT(v string) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCreateTime), v))
+		s.Where(sql.GT(s.C(FieldToken), v))
 	})
 }
 
-// CreateTimeGTE applies the GTE predicate on the "create_time" field.
-func CreateTimeGTE(v time.Time) predicate.Session {
+// TokenGTE applies the GTE predicate on the "token" field.
+func TokenGTE(v string) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCreateTime), v))
+		s.Where(sql.GTE(s.C(FieldToken), v))
 	})
 }
 
-// CreateTimeLT applies the LT predicate on the "create_time" field.
-func CreateTimeLT(v time.Time) predicate.Session {
+// TokenLT applies the LT predicate on the "token" field.
+func TokenLT(v string) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCreateTime), v))
+		s.Where(sql.LT(s.C(FieldToken), v))
 	})
 }
 
-// CreateTimeLTE applies the LTE predicate on the "create_time" field.
-func CreateTimeLTE(v time.Time) predicate.Session {
+// TokenLTE applies the LTE predicate on the "token" field.
+func TokenLTE(v string) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCreateTime), v))
+		s.Where(sql.LTE(s.C(FieldToken), v))
 	})
 }
 
-// UpdateTimeEQ applies the EQ predicate on the "update_time" field.
-func UpdateTimeEQ(v time.Time) predicate.Session {
+// TokenContains applies the Contains predicate on the "token" field.
+func TokenContains(v string) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
+		s.Where(sql.Contains(s.C(FieldToken), v))
 	})
 }
 
-// UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
-func UpdateTimeNEQ(v time.Time) predicate.Session {
+// TokenHasPrefix applies the HasPrefix predicate on the "token" field.
+func TokenHasPrefix(v string) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUpdateTime), v))
+		s.Where(sql.HasPrefix(s.C(FieldToken), v))
 	})
 }
 
-// UpdateTimeIn applies the In predicate on the "update_time" field.
-func UpdateTimeIn(vs ...time.Time) predicate.Session {
+// TokenHasSuffix applies the HasSuffix predicate on the "token" field.
+func TokenHasSuffix(v string) predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldToken), v))
+	})
+}
+
+// TokenEqualFold applies the EqualFold predicate on the "token" field.
+func TokenEqualFold(v string) predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldToken), v))
+	})
+}
+
+// TokenContainsFold applies the ContainsFold predicate on the "token" field.
+func TokenContainsFold(v string) predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldToken), v))
+	})
+}
+
+// DataEQ applies the EQ predicate on the "data" field.
+func DataEQ(v []byte) predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldData), v))
+	})
+}
+
+// DataNEQ applies the NEQ predicate on the "data" field.
+func DataNEQ(v []byte) predicate.Session {
+	return predicate.Session(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldData), v))
+	})
+}
+
+// DataIn applies the In predicate on the "data" field.
+func DataIn(vs ...[]byte) predicate.Session {
 	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldUpdateTime), v...))
+		s.Where(sql.In(s.C(FieldData), v...))
 	})
 }
 
-// UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
-func UpdateTimeNotIn(vs ...time.Time) predicate.Session {
+// DataNotIn applies the NotIn predicate on the "data" field.
+func DataNotIn(vs ...[]byte) predicate.Session {
 	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldUpdateTime), v...))
+		s.Where(sql.NotIn(s.C(FieldData), v...))
 	})
 }
 
-// UpdateTimeGT applies the GT predicate on the "update_time" field.
-func UpdateTimeGT(v time.Time) predicate.Session {
+// DataGT applies the GT predicate on the "data" field.
+func DataGT(v []byte) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldUpdateTime), v))
+		s.Where(sql.GT(s.C(FieldData), v))
 	})
 }
 
-// UpdateTimeGTE applies the GTE predicate on the "update_time" field.
-func UpdateTimeGTE(v time.Time) predicate.Session {
+// DataGTE applies the GTE predicate on the "data" field.
+func DataGTE(v []byte) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldUpdateTime), v))
+		s.Where(sql.GTE(s.C(FieldData), v))
 	})
 }
 
-// UpdateTimeLT applies the LT predicate on the "update_time" field.
-func UpdateTimeLT(v time.Time) predicate.Session {
+// DataLT applies the LT predicate on the "data" field.
+func DataLT(v []byte) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldUpdateTime), v))
+		s.Where(sql.LT(s.C(FieldData), v))
 	})
 }
 
-// UpdateTimeLTE applies the LTE predicate on the "update_time" field.
-func UpdateTimeLTE(v time.Time) predicate.Session {
+// DataLTE applies the LTE predicate on the "data" field.
+func DataLTE(v []byte) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldUpdateTime), v))
-	})
-}
-
-// UserIDEQ applies the EQ predicate on the "user_id" field.
-func UserIDEQ(v int64) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUserID), v))
-	})
-}
-
-// UserIDNEQ applies the NEQ predicate on the "user_id" field.
-func UserIDNEQ(v int64) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUserID), v))
-	})
-}
-
-// UserIDIn applies the In predicate on the "user_id" field.
-func UserIDIn(vs ...int64) predicate.Session {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldUserID), v...))
-	})
-}
-
-// UserIDNotIn applies the NotIn predicate on the "user_id" field.
-func UserIDNotIn(vs ...int64) predicate.Session {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldUserID), v...))
-	})
-}
-
-// SidEQ applies the EQ predicate on the "sid" field.
-func SidEQ(v string) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldSid), v))
-	})
-}
-
-// SidNEQ applies the NEQ predicate on the "sid" field.
-func SidNEQ(v string) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldSid), v))
-	})
-}
-
-// SidIn applies the In predicate on the "sid" field.
-func SidIn(vs ...string) predicate.Session {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldSid), v...))
-	})
-}
-
-// SidNotIn applies the NotIn predicate on the "sid" field.
-func SidNotIn(vs ...string) predicate.Session {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldSid), v...))
-	})
-}
-
-// SidGT applies the GT predicate on the "sid" field.
-func SidGT(v string) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldSid), v))
-	})
-}
-
-// SidGTE applies the GTE predicate on the "sid" field.
-func SidGTE(v string) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldSid), v))
-	})
-}
-
-// SidLT applies the LT predicate on the "sid" field.
-func SidLT(v string) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldSid), v))
-	})
-}
-
-// SidLTE applies the LTE predicate on the "sid" field.
-func SidLTE(v string) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldSid), v))
-	})
-}
-
-// SidContains applies the Contains predicate on the "sid" field.
-func SidContains(v string) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldSid), v))
-	})
-}
-
-// SidHasPrefix applies the HasPrefix predicate on the "sid" field.
-func SidHasPrefix(v string) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldSid), v))
-	})
-}
-
-// SidHasSuffix applies the HasSuffix predicate on the "sid" field.
-func SidHasSuffix(v string) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldSid), v))
-	})
-}
-
-// SidEqualFold applies the EqualFold predicate on the "sid" field.
-func SidEqualFold(v string) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldSid), v))
-	})
-}
-
-// SidContainsFold applies the ContainsFold predicate on the "sid" field.
-func SidContainsFold(v string) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldSid), v))
+		s.Where(sql.LTE(s.C(FieldData), v))
 	})
 }
 
@@ -447,84 +325,6 @@ func ExpiryLT(v time.Time) predicate.Session {
 func ExpiryLTE(v time.Time) predicate.Session {
 	return predicate.Session(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldExpiry), v))
-	})
-}
-
-// DeletedEQ applies the EQ predicate on the "deleted" field.
-func DeletedEQ(v bool) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDeleted), v))
-	})
-}
-
-// DeletedNEQ applies the NEQ predicate on the "deleted" field.
-func DeletedNEQ(v bool) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldDeleted), v))
-	})
-}
-
-// TypeEQ applies the EQ predicate on the "type" field.
-func TypeEQ(v Type) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldType), v))
-	})
-}
-
-// TypeNEQ applies the NEQ predicate on the "type" field.
-func TypeNEQ(v Type) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldType), v))
-	})
-}
-
-// TypeIn applies the In predicate on the "type" field.
-func TypeIn(vs ...Type) predicate.Session {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldType), v...))
-	})
-}
-
-// TypeNotIn applies the NotIn predicate on the "type" field.
-func TypeNotIn(vs ...Type) predicate.Session {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Session(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldType), v...))
-	})
-}
-
-// HasUser applies the HasEdge predicate on the "user" edge.
-func HasUser() predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UserTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
-func HasUserWith(preds ...predicate.User) predicate.Session {
-	return predicate.Session(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UserInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
 	})
 }
 

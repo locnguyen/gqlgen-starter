@@ -2,53 +2,27 @@
 
 package session
 
-import (
-	"fmt"
-	"time"
-)
-
 const (
 	// Label holds the string label denoting the session type in the database.
 	Label = "session"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldCreateTime holds the string denoting the create_time field in the database.
-	FieldCreateTime = "create_time"
-	// FieldUpdateTime holds the string denoting the update_time field in the database.
-	FieldUpdateTime = "update_time"
-	// FieldUserID holds the string denoting the user_id field in the database.
-	FieldUserID = "user_id"
-	// FieldSid holds the string denoting the sid field in the database.
-	FieldSid = "sid"
+	// FieldToken holds the string denoting the token field in the database.
+	FieldToken = "token"
+	// FieldData holds the string denoting the data field in the database.
+	FieldData = "data"
 	// FieldExpiry holds the string denoting the expiry field in the database.
 	FieldExpiry = "expiry"
-	// FieldDeleted holds the string denoting the deleted field in the database.
-	FieldDeleted = "deleted"
-	// FieldType holds the string denoting the type field in the database.
-	FieldType = "type"
-	// EdgeUser holds the string denoting the user edge name in mutations.
-	EdgeUser = "user"
 	// Table holds the table name of the session in the database.
 	Table = "sessions"
-	// UserTable is the table that holds the user relation/edge.
-	UserTable = "sessions"
-	// UserInverseTable is the table name for the User entity.
-	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UserInverseTable = "users"
-	// UserColumn is the table column denoting the user relation/edge.
-	UserColumn = "user_id"
 )
 
 // Columns holds all SQL columns for session fields.
 var Columns = []string{
 	FieldID,
-	FieldCreateTime,
-	FieldUpdateTime,
-	FieldUserID,
-	FieldSid,
+	FieldToken,
+	FieldData,
 	FieldExpiry,
-	FieldDeleted,
-	FieldType,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -62,37 +36,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultCreateTime holds the default value on creation for the "create_time" field.
-	DefaultCreateTime func() time.Time
-	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
-	DefaultUpdateTime func() time.Time
-	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
-	UpdateDefaultUpdateTime func() time.Time
-	// SidValidator is a validator for the "sid" field. It is called by the builders before save.
-	SidValidator func(string) error
-	// DefaultDeleted holds the default value on creation for the "deleted" field.
-	DefaultDeleted bool
+	// TokenValidator is a validator for the "token" field. It is called by the builders before save.
+	TokenValidator func(string) error
+	// DataValidator is a validator for the "data" field. It is called by the builders before save.
+	DataValidator func([]byte) error
 )
-
-// Type defines the type for the "type" enum field.
-type Type string
-
-// Type values.
-const (
-	TypeGeneral   Type = "general"
-	TypeSingleUse Type = "single_use"
-)
-
-func (_type Type) String() string {
-	return string(_type)
-}
-
-// TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
-func TypeValidator(_type Type) error {
-	switch _type {
-	case TypeGeneral, TypeSingleUse:
-		return nil
-	default:
-		return fmt.Errorf("session: invalid enum value for type field: %q", _type)
-	}
-}

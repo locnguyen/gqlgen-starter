@@ -5,6 +5,7 @@ go 1.18
 require (
 	entgo.io/ent v0.11.3
 	github.com/99designs/gqlgen v0.17.20
+	github.com/alexedwards/scs/v2 v2.5.0
 	github.com/go-faker/faker/v4 v4.0.0-beta.3
 	github.com/jackc/pgx/v4 v4.17.2
 	github.com/pkg/errors v0.9.1
@@ -23,6 +24,7 @@ require (
 	github.com/Microsoft/hcsshim v0.9.4 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/agnivade/levenshtein v1.1.1 // indirect
+	github.com/alexedwards/scs/postgresstore v0.0.0-20220528130143-d93ace5be94b // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/containerd/cgroups v1.0.4 // indirect
@@ -51,6 +53,7 @@ require (
 	github.com/jackc/pgproto3/v2 v2.3.1 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect
 	github.com/jackc/pgtype v1.12.0 // indirect
+	github.com/lib/pq v1.10.7 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect

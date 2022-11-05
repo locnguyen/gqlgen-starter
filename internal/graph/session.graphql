@@ -1,5 +1,5 @@
 type Session {
-    sid: String!
+    token: String!
     expiry: Time!
 }
 
@@ -14,5 +14,5 @@ extend type Query {
 
 extend type Mutation {
     createSession(input: CreateSessionInput!): Session!
-    deleteSession: Session!
+    deleteSession: Boolean!
 }

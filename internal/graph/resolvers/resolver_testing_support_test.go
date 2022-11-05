@@ -2,9 +2,11 @@ package resolvers
 
 import (
 	"context"
+	"encoding/gob"
 	"fmt"
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/alexedwards/scs/v2"
 	"github.com/go-faker/faker/v4"
 	"github.com/rs/zerolog"
 	"github.com/testcontainers/testcontainers-go"
@@ -15,7 +17,6 @@ import (
 	"gqlgen-starter/internal/ent"
 	"gqlgen-starter/internal/graph/generated"
 	"gqlgen-starter/internal/middleware"
-	"net/http/httptest"
 	"os"
 	"testing"
 )
@@ -28,14 +29,15 @@ type TestContext struct {
 
 // In the real server a ContextCookie is always created in the CookieAuth middleware
 // In unit tests this does not happen upstream, so we need to provide it
-func AddContextCookieForTesting(user *ent.User, sid *string) client.Option {
+func AddContextUserForTesting(user *ent.User, sid *string) client.Option {
 	return func(bd *client.Request) {
-		ctxCookie := &middleware.ContextCookie{
-			User:   user,
-			Writer: httptest.NewRecorder(),
-			Sid:    sid,
-		}
-		ctx := context.WithValue(context.Background(), middleware.CookieCtxKey, ctxCookie)
+		//ctxCookie := &middleware.ContextCookie{
+		//	User:   user,
+		//	Writer: httptest.NewRecorder(),
+		//	Sid:    sid,
+		//}
+
+		ctx := context.WithValue(context.Background(), middleware.ContextUserKey, user)
 		bd.HTTP = bd.HTTP.WithContext(ctx)
 	}
 }
@@ -55,13 +57,16 @@ func InitTestContext(t *testing.T, testName string) *TestContext {
 		t.Fatal(err)
 	}
 
+	sessionManager := scs.New()
+	gob.Register(&ent.User{})
 	appCtx := &app.AppContext{
-		DB:        dbConn,
-		EntClient: entClient,
-		Logger:    &logger,
+		DB:             dbConn,
+		EntClient:      entClient,
+		Logger:         &logger,
+		SessionManager: sessionManager,
 	}
 
-	gqlGenClient := client.New(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: NewRootResolver(appCtx)})))
+	gqlGenClient := client.New(sessionManager.LoadAndSave(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: NewRootResolver(appCtx)}))))
 
 	return &TestContext{
 		GqlGenClient: gqlGenClient,

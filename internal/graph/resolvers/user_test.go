@@ -7,7 +7,6 @@ import (
 	"github.com/go-faker/faker/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gqlgen-starter/internal/ent/session"
 	"gqlgen-starter/internal/ent/user"
 	"testing"
 )
@@ -90,23 +89,13 @@ func (suite *UserResolverSuite) TestUserQueryNotFound() {
 func (suite *UserResolverSuite) TestCreateUserMutation() {
 	var resp struct {
 		CreateUser struct {
-			Sid    string `json:"sid"`
+			Token  string `json:"token"`
 			Expiry string `json:"expiry"`
 		}
 	}
-	suite.GqlGenClient.MustPost(`mutation { createUser(input: { firstName: "Natasha" lastName: "Romanova" email: "blackwidow@avengers.com" phoneNumber: "+8888888888" password: "P@ssw0rd!" passwordConfirmation: "P@ssw0rd!" }) { sid expiry } }`, &resp, AddContextCookieForTesting(nil, nil))
-	assert.NotEmpty(suite.T(), resp.CreateUser.Sid)
+	suite.GqlGenClient.MustPost(`mutation { createUser(input: { firstName: "Natasha" lastName: "Romanova" email: "blackwidow@avengers.com" phoneNumber: "+8888888888" password: "P@ssw0rd!" passwordConfirmation: "P@ssw0rd!" }) { token expiry } }`, &resp, AddContextUserForTesting(nil, nil))
+	assert.NotEmpty(suite.T(), resp.CreateUser.Token)
 	assert.NotEmpty(suite.T(), resp.CreateUser.Expiry)
-
-	sess, err := suite.AppCtx.EntClient.Session.Query().
-		Where(session.Sid(resp.CreateUser.Sid)).
-		Only(context.Background())
-
-	if err != nil {
-		suite.T().Error(err)
-	}
-
-	assert.Equal(suite.T(), resp.CreateUser.Sid, sess.Sid)
 
 	subject, err := suite.AppCtx.EntClient.User.Query().
 		Where(user.Email("blackwidow@avengers.com")).

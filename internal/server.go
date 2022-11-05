@@ -1,14 +1,18 @@
 package internal
 
 import (
+	"encoding/gob"
 	"fmt"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/alexedwards/scs/postgresstore"
+	"github.com/alexedwards/scs/v2"
 	"github.com/rs/zerolog"
 	"gqlgen-starter/cmd/build"
 	"gqlgen-starter/config"
 	"gqlgen-starter/db"
 	"gqlgen-starter/internal/app"
+	"gqlgen-starter/internal/ent"
 	"gqlgen-starter/internal/graph/generated"
 	"gqlgen-starter/internal/graph/resolvers"
 	"gqlgen-starter/internal/middleware"
@@ -16,6 +20,8 @@ import (
 	"os"
 	"time"
 )
+
+var sessionManager *scs.SessionManager
 
 func StartServer() {
 	logger := initZeroLogger()
@@ -31,7 +37,13 @@ func StartServer() {
 		logger.Fatal().Err(err).Msg("NO DATABASE CONNECTION")
 	}
 
-	appCtx := &app.AppContext{DB: conn, EntClient: entClient, Logger: logger}
+	sessionManager = scs.New()
+	sessionManager.Lifetime = 24 * time.Hour
+	sessionManager.Cookie.Name = middleware.SessionCookieName
+	sessionManager.Store = postgresstore.New(conn)
+	gob.Register(&ent.User{})
+
+	appCtx := &app.AppContext{DB: conn, EntClient: entClient, Logger: logger, SessionManager: sessionManager}
 
 	rootResolver := resolvers.NewRootResolver(appCtx)
 
@@ -42,7 +54,7 @@ func StartServer() {
 		logger.Info().Msgf("connect to http://localhost:%s/ for GraphQL playground", config.Application.ServerPort)
 	}
 
-	http.Handle("/query", middleware.AuthCookie(appCtx, srv))
+	http.Handle("/query", sessionManager.LoadAndSave(middleware.AddContextUser(appCtx, srv)))
 
 	logger.Info().Msgf("Starting GraphQL API Server at :%s 🚀", config.Application.ServerPort)
 	if err = http.ListenAndServe(fmt.Sprintf(":%s", config.Application.ServerPort), nil); err != nil {
@@ -70,7 +82,6 @@ func initZeroLogger() *zerolog.Logger {
 			Str("BuildVersion", build.BuildVersion).
 			Logger()
 	} else {
-
 		logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}).
 			Level(logLevel).
 			With().

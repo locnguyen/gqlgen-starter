@@ -37,28 +37,17 @@ type User struct {
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
-	// Sessions holds the value of the sessions edge.
-	Sessions []*Session `json:"sessions,omitempty"`
 	// Posts holds the value of the posts edge.
 	Posts []*Post `json:"posts,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
-}
-
-// SessionsOrErr returns the Sessions value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) SessionsOrErr() ([]*Session, error) {
-	if e.loadedTypes[0] {
-		return e.Sessions, nil
-	}
-	return nil, &NotLoadedError{edge: "sessions"}
+	loadedTypes [1]bool
 }
 
 // PostsOrErr returns the Posts value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) PostsOrErr() ([]*Post, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[0] {
 		return e.Posts, nil
 	}
 	return nil, &NotLoadedError{edge: "posts"}
@@ -143,11 +132,6 @@ func (u *User) assignValues(columns []string, values []any) error {
 		}
 	}
 	return nil
-}
-
-// QuerySessions queries the "sessions" edge of the User entity.
-func (u *User) QuerySessions() *SessionQuery {
-	return (&UserClient{config: u.config}).QuerySessions(u)
 }
 
 // QueryPosts queries the "posts" edge of the User entity.

@@ -5,19 +5,14 @@ package resolvers
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/base32"
+	"github.com/vektah/gqlparser/v2/gqlerror"
+	"golang.org/x/crypto/bcrypt"
 	"gqlgen-starter/internal/ent"
-	"gqlgen-starter/internal/ent/session"
 	"gqlgen-starter/internal/graph/generated"
 	"gqlgen-starter/internal/graph/model"
 	"gqlgen-starter/internal/middleware"
 	"strconv"
 	"strings"
-	"time"
-
-	"github.com/vektah/gqlparser/v2/gqlerror"
-	"golang.org/x/crypto/bcrypt"
 )
 
 // CreateUser is the resolver for the createUser field.
@@ -50,27 +45,16 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.CreateUse
 		Interface("result", u).
 		Msg("Created user")
 
-	randomBytes := make([]byte, 16)
-	_, err = rand.Read(randomBytes)
-	if err != nil {
-		r.Logger.Err(err).Msg("Error creating session")
-		return nil, err
+	if err := r.AppContext.SessionManager.RenewToken(ctx); err != nil {
+		r.Logger.Error().Err(err).Msg("Error renewing token after creating user")
+		return nil, gqlerror.Errorf("Error creating session for new user")
 	}
+	r.AppContext.SessionManager.Put(ctx, middleware.ContextUserKey, u)
 
-	sid := base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(randomBytes)
-
-	sess, err := r.EntClient.Session.Create().
-		SetSid(sid).
-		SetExpiry(time.Now().Add(24 * time.Hour)).
-		SetType(session.TypeGeneral).
-		SetUser(u).
-		Save(ctx)
-
-	r.Logger.Debug().Interface("session", sess).Msg("Created user then session")
-	ctxCookie := ctx.Value(middleware.CookieCtxKey).(*middleware.ContextCookie)
-	ctxCookie.SetSession(sess)
-
-	return sess, nil
+	return &ent.Session{
+		Token:  r.AppContext.SessionManager.Token(ctx),
+		Expiry: r.AppContext.SessionManager.Deadline(ctx),
+	}, nil
 }
 
 // User is the resolver for the user field.

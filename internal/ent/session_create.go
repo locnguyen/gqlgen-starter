@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"gqlgen-starter/internal/ent/session"
-	"gqlgen-starter/internal/ent/user"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -21,43 +20,15 @@ type SessionCreate struct {
 	hooks    []Hook
 }
 
-// SetCreateTime sets the "create_time" field.
-func (sc *SessionCreate) SetCreateTime(t time.Time) *SessionCreate {
-	sc.mutation.SetCreateTime(t)
+// SetToken sets the "token" field.
+func (sc *SessionCreate) SetToken(s string) *SessionCreate {
+	sc.mutation.SetToken(s)
 	return sc
 }
 
-// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (sc *SessionCreate) SetNillableCreateTime(t *time.Time) *SessionCreate {
-	if t != nil {
-		sc.SetCreateTime(*t)
-	}
-	return sc
-}
-
-// SetUpdateTime sets the "update_time" field.
-func (sc *SessionCreate) SetUpdateTime(t time.Time) *SessionCreate {
-	sc.mutation.SetUpdateTime(t)
-	return sc
-}
-
-// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (sc *SessionCreate) SetNillableUpdateTime(t *time.Time) *SessionCreate {
-	if t != nil {
-		sc.SetUpdateTime(*t)
-	}
-	return sc
-}
-
-// SetUserID sets the "user_id" field.
-func (sc *SessionCreate) SetUserID(i int64) *SessionCreate {
-	sc.mutation.SetUserID(i)
-	return sc
-}
-
-// SetSid sets the "sid" field.
-func (sc *SessionCreate) SetSid(s string) *SessionCreate {
-	sc.mutation.SetSid(s)
+// SetData sets the "data" field.
+func (sc *SessionCreate) SetData(b []byte) *SessionCreate {
+	sc.mutation.SetData(b)
 	return sc
 }
 
@@ -65,31 +36,6 @@ func (sc *SessionCreate) SetSid(s string) *SessionCreate {
 func (sc *SessionCreate) SetExpiry(t time.Time) *SessionCreate {
 	sc.mutation.SetExpiry(t)
 	return sc
-}
-
-// SetDeleted sets the "deleted" field.
-func (sc *SessionCreate) SetDeleted(b bool) *SessionCreate {
-	sc.mutation.SetDeleted(b)
-	return sc
-}
-
-// SetNillableDeleted sets the "deleted" field if the given value is not nil.
-func (sc *SessionCreate) SetNillableDeleted(b *bool) *SessionCreate {
-	if b != nil {
-		sc.SetDeleted(*b)
-	}
-	return sc
-}
-
-// SetType sets the "type" field.
-func (sc *SessionCreate) SetType(s session.Type) *SessionCreate {
-	sc.mutation.SetType(s)
-	return sc
-}
-
-// SetUser sets the "user" edge to the User entity.
-func (sc *SessionCreate) SetUser(u *User) *SessionCreate {
-	return sc.SetUserID(u.ID)
 }
 
 // Mutation returns the SessionMutation object of the builder.
@@ -103,7 +49,6 @@ func (sc *SessionCreate) Save(ctx context.Context) (*Session, error) {
 		err  error
 		node *Session
 	)
-	sc.defaults()
 	if len(sc.hooks) == 0 {
 		if err = sc.check(); err != nil {
 			return nil, err
@@ -167,57 +112,26 @@ func (sc *SessionCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (sc *SessionCreate) defaults() {
-	if _, ok := sc.mutation.CreateTime(); !ok {
-		v := session.DefaultCreateTime()
-		sc.mutation.SetCreateTime(v)
-	}
-	if _, ok := sc.mutation.UpdateTime(); !ok {
-		v := session.DefaultUpdateTime()
-		sc.mutation.SetUpdateTime(v)
-	}
-	if _, ok := sc.mutation.Deleted(); !ok {
-		v := session.DefaultDeleted
-		sc.mutation.SetDeleted(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (sc *SessionCreate) check() error {
-	if _, ok := sc.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "Session.create_time"`)}
+	if _, ok := sc.mutation.Token(); !ok {
+		return &ValidationError{Name: "token", err: errors.New(`ent: missing required field "Session.token"`)}
 	}
-	if _, ok := sc.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Session.update_time"`)}
+	if v, ok := sc.mutation.Token(); ok {
+		if err := session.TokenValidator(v); err != nil {
+			return &ValidationError{Name: "token", err: fmt.Errorf(`ent: validator failed for field "Session.token": %w`, err)}
+		}
 	}
-	if _, ok := sc.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user_id", err: errors.New(`ent: missing required field "Session.user_id"`)}
+	if _, ok := sc.mutation.Data(); !ok {
+		return &ValidationError{Name: "data", err: errors.New(`ent: missing required field "Session.data"`)}
 	}
-	if _, ok := sc.mutation.Sid(); !ok {
-		return &ValidationError{Name: "sid", err: errors.New(`ent: missing required field "Session.sid"`)}
-	}
-	if v, ok := sc.mutation.Sid(); ok {
-		if err := session.SidValidator(v); err != nil {
-			return &ValidationError{Name: "sid", err: fmt.Errorf(`ent: validator failed for field "Session.sid": %w`, err)}
+	if v, ok := sc.mutation.Data(); ok {
+		if err := session.DataValidator(v); err != nil {
+			return &ValidationError{Name: "data", err: fmt.Errorf(`ent: validator failed for field "Session.data": %w`, err)}
 		}
 	}
 	if _, ok := sc.mutation.Expiry(); !ok {
 		return &ValidationError{Name: "expiry", err: errors.New(`ent: missing required field "Session.expiry"`)}
-	}
-	if _, ok := sc.mutation.Deleted(); !ok {
-		return &ValidationError{Name: "deleted", err: errors.New(`ent: missing required field "Session.deleted"`)}
-	}
-	if _, ok := sc.mutation.GetType(); !ok {
-		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "Session.type"`)}
-	}
-	if v, ok := sc.mutation.GetType(); ok {
-		if err := session.TypeValidator(v); err != nil {
-			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Session.type": %w`, err)}
-		}
-	}
-	if _, ok := sc.mutation.UserID(); !ok {
-		return &ValidationError{Name: "user", err: errors.New(`ent: missing required edge "Session.user"`)}
 	}
 	return nil
 }
@@ -246,29 +160,21 @@ func (sc *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
-	if value, ok := sc.mutation.CreateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: session.FieldCreateTime,
-		})
-		_node.CreateTime = value
-	}
-	if value, ok := sc.mutation.UpdateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: session.FieldUpdateTime,
-		})
-		_node.UpdateTime = value
-	}
-	if value, ok := sc.mutation.Sid(); ok {
+	if value, ok := sc.mutation.Token(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: session.FieldSid,
+			Column: session.FieldToken,
 		})
-		_node.Sid = value
+		_node.Token = value
+	}
+	if value, ok := sc.mutation.Data(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBytes,
+			Value:  value,
+			Column: session.FieldData,
+		})
+		_node.Data = value
 	}
 	if value, ok := sc.mutation.Expiry(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -277,42 +183,6 @@ func (sc *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 			Column: session.FieldExpiry,
 		})
 		_node.Expiry = value
-	}
-	if value, ok := sc.mutation.Deleted(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: session.FieldDeleted,
-		})
-		_node.Deleted = value
-	}
-	if value, ok := sc.mutation.GetType(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: session.FieldType,
-		})
-		_node.Type = value
-	}
-	if nodes := sc.mutation.UserIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   session.UserTable,
-			Columns: []string{session.UserColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.UserID = nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
@@ -331,7 +201,6 @@ func (scb *SessionCreateBulk) Save(ctx context.Context) ([]*Session, error) {
 	for i := range scb.builders {
 		func(i int, root context.Context) {
 			builder := scb.builders[i]
-			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*SessionMutation)
 				if !ok {

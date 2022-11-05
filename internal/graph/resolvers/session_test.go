@@ -6,7 +6,6 @@ import (
 	"github.com/go-faker/faker/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"gqlgen-starter/internal/ent/session"
 	"testing"
 	"time"
 )
@@ -37,7 +36,7 @@ func (suite *SessionResolverSuite) TestViewerQuery() {
 		Viewer UserObj
 	}
 
-	suite.GqlGenClient.MustPost(q, &resp, AddContextCookieForTesting(u, nil))
+	suite.GqlGenClient.MustPost(q, &resp, AddContextUserForTesting(u, nil))
 
 	assert.Equal(suite.T(), u.Email, resp.Viewer.Email)
 	assert.Equal(suite.T(), u.FirstName, resp.Viewer.FirstName)
@@ -51,7 +50,7 @@ func (suite *SessionResolverSuite) TestCreateSessionMutation() {
 	q := `
 		mutation ($input: CreateSessionInput!) {
 			createSession(input: $input) {
-				sid
+				token
 				expiry
 			}
 		}
@@ -59,7 +58,7 @@ func (suite *SessionResolverSuite) TestCreateSessionMutation() {
 
 	var resp struct {
 		CreateSession struct {
-			Sid    string `json:"sid"`
+			Token  string `json:"token"`
 			Expiry string `json:"expiry"`
 		} `json:"createSession"`
 	}
@@ -74,26 +73,21 @@ func (suite *SessionResolverSuite) TestCreateSessionMutation() {
 	}
 
 	suite.AppCtx.Logger.Debug().Interface("input", i).Msg("creds")
-	suite.GqlGenClient.MustPost(q, &resp, client.Var("input", i), AddContextCookieForTesting(nil, nil))
+	suite.GqlGenClient.MustPost(q, &resp, client.Var("input", i), AddContextUserForTesting(nil, nil))
 
-	assert.NotEmpty(suite.T(), resp.CreateSession.Sid)
+	assert.NotEmpty(suite.T(), resp.CreateSession.Token)
 	assert.NotEmpty(suite.T(), resp.CreateSession.Expiry)
 }
 
 func (suite *SessionResolverSuite) TestDeleteSessionMutation() {
 	u, _ := CreateDummyUser(suite.T(), *suite.AppCtx.EntClient)
 	var resp struct {
-		DeleteSession struct {
-			Sid    string `json:"sid"`
-			Expiry string `json:"expiry"`
-		}
+		DeleteSession bool `json:"deleteSession"`
 	}
 
 	sess, err := suite.AppCtx.EntClient.Session.Create().
-		SetUser(u).
-		SetType(session.TypeGeneral).
-		SetSid(faker.UUIDHyphenated()).
-		SetDeleted(false).
+		SetData([]byte("hi")).
+		SetToken(faker.UUIDHyphenated()).
 		SetExpiry(time.Now().Add(1 * time.Hour)).
 		Save(context.Background())
 
@@ -101,13 +95,11 @@ func (suite *SessionResolverSuite) TestDeleteSessionMutation() {
 		suite.T().Error(err)
 	}
 
-	err = suite.GqlGenClient.Post(`mutation { deleteSession { sid expiry } }`, &resp, func(bd *client.Request) {}, AddContextCookieForTesting(u, &sess.Sid))
-
+	err = suite.GqlGenClient.Post(`mutation { deleteSession }`, &resp, func(bd *client.Request) {}, AddContextUserForTesting(u, &sess.Token))
 	if err != nil {
 		suite.AppCtx.Logger.Error().Err(err).Msg("Error POSTing deleteSession")
 		suite.T().Error(err)
 	}
 
-	sess, err = suite.AppCtx.EntClient.Session.Get(context.Background(), sess.ID)
-	assert.True(suite.T(), sess.Deleted)
+	assert.True(suite.T(), resp.DeleteSession)
 }

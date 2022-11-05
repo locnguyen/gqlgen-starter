@@ -571,15 +571,10 @@ type SessionMutation struct {
 	op            Op
 	typ           string
 	id            *int
-	create_time   *time.Time
-	update_time   *time.Time
-	sid           *string
+	token         *string
+	data          *[]byte
 	expiry        *time.Time
-	deleted       *bool
-	_type         *session.Type
 	clearedFields map[string]struct{}
-	user          *int64
-	cleareduser   bool
 	done          bool
 	oldValue      func(context.Context) (*Session, error)
 	predicates    []predicate.Session
@@ -683,148 +678,76 @@ func (m *SessionMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
-// SetCreateTime sets the "create_time" field.
-func (m *SessionMutation) SetCreateTime(t time.Time) {
-	m.create_time = &t
+// SetToken sets the "token" field.
+func (m *SessionMutation) SetToken(s string) {
+	m.token = &s
 }
 
-// CreateTime returns the value of the "create_time" field in the mutation.
-func (m *SessionMutation) CreateTime() (r time.Time, exists bool) {
-	v := m.create_time
+// Token returns the value of the "token" field in the mutation.
+func (m *SessionMutation) Token() (r string, exists bool) {
+	v := m.token
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldCreateTime returns the old "create_time" field's value of the Session entity.
+// OldToken returns the old "token" field's value of the Session entity.
 // If the Session object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SessionMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
+func (m *SessionMutation) OldToken(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreateTime is only allowed on UpdateOne operations")
+		return v, errors.New("OldToken is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreateTime requires an ID field in the mutation")
+		return v, errors.New("OldToken requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
+		return v, fmt.Errorf("querying old value for OldToken: %w", err)
 	}
-	return oldValue.CreateTime, nil
+	return oldValue.Token, nil
 }
 
-// ResetCreateTime resets all changes to the "create_time" field.
-func (m *SessionMutation) ResetCreateTime() {
-	m.create_time = nil
+// ResetToken resets all changes to the "token" field.
+func (m *SessionMutation) ResetToken() {
+	m.token = nil
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (m *SessionMutation) SetUpdateTime(t time.Time) {
-	m.update_time = &t
+// SetData sets the "data" field.
+func (m *SessionMutation) SetData(b []byte) {
+	m.data = &b
 }
 
-// UpdateTime returns the value of the "update_time" field in the mutation.
-func (m *SessionMutation) UpdateTime() (r time.Time, exists bool) {
-	v := m.update_time
+// Data returns the value of the "data" field in the mutation.
+func (m *SessionMutation) Data() (r []byte, exists bool) {
+	v := m.data
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldUpdateTime returns the old "update_time" field's value of the Session entity.
+// OldData returns the old "data" field's value of the Session entity.
 // If the Session object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SessionMutation) OldUpdateTime(ctx context.Context) (v time.Time, err error) {
+func (m *SessionMutation) OldData(ctx context.Context) (v []byte, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdateTime is only allowed on UpdateOne operations")
+		return v, errors.New("OldData is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdateTime requires an ID field in the mutation")
+		return v, errors.New("OldData requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdateTime: %w", err)
+		return v, fmt.Errorf("querying old value for OldData: %w", err)
 	}
-	return oldValue.UpdateTime, nil
+	return oldValue.Data, nil
 }
 
-// ResetUpdateTime resets all changes to the "update_time" field.
-func (m *SessionMutation) ResetUpdateTime() {
-	m.update_time = nil
-}
-
-// SetUserID sets the "user_id" field.
-func (m *SessionMutation) SetUserID(i int64) {
-	m.user = &i
-}
-
-// UserID returns the value of the "user_id" field in the mutation.
-func (m *SessionMutation) UserID() (r int64, exists bool) {
-	v := m.user
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUserID returns the old "user_id" field's value of the Session entity.
-// If the Session object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SessionMutation) OldUserID(ctx context.Context) (v int64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUserID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
-	}
-	return oldValue.UserID, nil
-}
-
-// ResetUserID resets all changes to the "user_id" field.
-func (m *SessionMutation) ResetUserID() {
-	m.user = nil
-}
-
-// SetSid sets the "sid" field.
-func (m *SessionMutation) SetSid(s string) {
-	m.sid = &s
-}
-
-// Sid returns the value of the "sid" field in the mutation.
-func (m *SessionMutation) Sid() (r string, exists bool) {
-	v := m.sid
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSid returns the old "sid" field's value of the Session entity.
-// If the Session object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SessionMutation) OldSid(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSid is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSid requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSid: %w", err)
-	}
-	return oldValue.Sid, nil
-}
-
-// ResetSid resets all changes to the "sid" field.
-func (m *SessionMutation) ResetSid() {
-	m.sid = nil
+// ResetData resets all changes to the "data" field.
+func (m *SessionMutation) ResetData() {
+	m.data = nil
 }
 
 // SetExpiry sets the "expiry" field.
@@ -863,104 +786,6 @@ func (m *SessionMutation) ResetExpiry() {
 	m.expiry = nil
 }
 
-// SetDeleted sets the "deleted" field.
-func (m *SessionMutation) SetDeleted(b bool) {
-	m.deleted = &b
-}
-
-// Deleted returns the value of the "deleted" field in the mutation.
-func (m *SessionMutation) Deleted() (r bool, exists bool) {
-	v := m.deleted
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDeleted returns the old "deleted" field's value of the Session entity.
-// If the Session object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SessionMutation) OldDeleted(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDeleted is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDeleted requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDeleted: %w", err)
-	}
-	return oldValue.Deleted, nil
-}
-
-// ResetDeleted resets all changes to the "deleted" field.
-func (m *SessionMutation) ResetDeleted() {
-	m.deleted = nil
-}
-
-// SetType sets the "type" field.
-func (m *SessionMutation) SetType(s session.Type) {
-	m._type = &s
-}
-
-// GetType returns the value of the "type" field in the mutation.
-func (m *SessionMutation) GetType() (r session.Type, exists bool) {
-	v := m._type
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldType returns the old "type" field's value of the Session entity.
-// If the Session object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *SessionMutation) OldType(ctx context.Context) (v session.Type, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldType is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldType requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldType: %w", err)
-	}
-	return oldValue.Type, nil
-}
-
-// ResetType resets all changes to the "type" field.
-func (m *SessionMutation) ResetType() {
-	m._type = nil
-}
-
-// ClearUser clears the "user" edge to the User entity.
-func (m *SessionMutation) ClearUser() {
-	m.cleareduser = true
-}
-
-// UserCleared reports if the "user" edge to the User entity was cleared.
-func (m *SessionMutation) UserCleared() bool {
-	return m.cleareduser
-}
-
-// UserIDs returns the "user" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// UserID instead. It exists only for internal usage by the builders.
-func (m *SessionMutation) UserIDs() (ids []int64) {
-	if id := m.user; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetUser resets all changes to the "user" edge.
-func (m *SessionMutation) ResetUser() {
-	m.user = nil
-	m.cleareduser = false
-}
-
 // Where appends a list predicates to the SessionMutation builder.
 func (m *SessionMutation) Where(ps ...predicate.Session) {
 	m.predicates = append(m.predicates, ps...)
@@ -980,27 +805,15 @@ func (m *SessionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SessionMutation) Fields() []string {
-	fields := make([]string, 0, 7)
-	if m.create_time != nil {
-		fields = append(fields, session.FieldCreateTime)
+	fields := make([]string, 0, 3)
+	if m.token != nil {
+		fields = append(fields, session.FieldToken)
 	}
-	if m.update_time != nil {
-		fields = append(fields, session.FieldUpdateTime)
-	}
-	if m.user != nil {
-		fields = append(fields, session.FieldUserID)
-	}
-	if m.sid != nil {
-		fields = append(fields, session.FieldSid)
+	if m.data != nil {
+		fields = append(fields, session.FieldData)
 	}
 	if m.expiry != nil {
 		fields = append(fields, session.FieldExpiry)
-	}
-	if m.deleted != nil {
-		fields = append(fields, session.FieldDeleted)
-	}
-	if m._type != nil {
-		fields = append(fields, session.FieldType)
 	}
 	return fields
 }
@@ -1010,20 +823,12 @@ func (m *SessionMutation) Fields() []string {
 // schema.
 func (m *SessionMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case session.FieldCreateTime:
-		return m.CreateTime()
-	case session.FieldUpdateTime:
-		return m.UpdateTime()
-	case session.FieldUserID:
-		return m.UserID()
-	case session.FieldSid:
-		return m.Sid()
+	case session.FieldToken:
+		return m.Token()
+	case session.FieldData:
+		return m.Data()
 	case session.FieldExpiry:
 		return m.Expiry()
-	case session.FieldDeleted:
-		return m.Deleted()
-	case session.FieldType:
-		return m.GetType()
 	}
 	return nil, false
 }
@@ -1033,20 +838,12 @@ func (m *SessionMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *SessionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case session.FieldCreateTime:
-		return m.OldCreateTime(ctx)
-	case session.FieldUpdateTime:
-		return m.OldUpdateTime(ctx)
-	case session.FieldUserID:
-		return m.OldUserID(ctx)
-	case session.FieldSid:
-		return m.OldSid(ctx)
+	case session.FieldToken:
+		return m.OldToken(ctx)
+	case session.FieldData:
+		return m.OldData(ctx)
 	case session.FieldExpiry:
 		return m.OldExpiry(ctx)
-	case session.FieldDeleted:
-		return m.OldDeleted(ctx)
-	case session.FieldType:
-		return m.OldType(ctx)
 	}
 	return nil, fmt.Errorf("unknown Session field %s", name)
 }
@@ -1056,33 +853,19 @@ func (m *SessionMutation) OldField(ctx context.Context, name string) (ent.Value,
 // type.
 func (m *SessionMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case session.FieldCreateTime:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreateTime(v)
-		return nil
-	case session.FieldUpdateTime:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdateTime(v)
-		return nil
-	case session.FieldUserID:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUserID(v)
-		return nil
-	case session.FieldSid:
+	case session.FieldToken:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetSid(v)
+		m.SetToken(v)
+		return nil
+	case session.FieldData:
+		v, ok := value.([]byte)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetData(v)
 		return nil
 	case session.FieldExpiry:
 		v, ok := value.(time.Time)
@@ -1091,20 +874,6 @@ func (m *SessionMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetExpiry(v)
 		return nil
-	case session.FieldDeleted:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDeleted(v)
-		return nil
-	case session.FieldType:
-		v, ok := value.(session.Type)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetType(v)
-		return nil
 	}
 	return fmt.Errorf("unknown Session field %s", name)
 }
@@ -1112,16 +881,13 @@ func (m *SessionMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *SessionMutation) AddedFields() []string {
-	var fields []string
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *SessionMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	}
 	return nil, false
 }
 
@@ -1157,26 +923,14 @@ func (m *SessionMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *SessionMutation) ResetField(name string) error {
 	switch name {
-	case session.FieldCreateTime:
-		m.ResetCreateTime()
+	case session.FieldToken:
+		m.ResetToken()
 		return nil
-	case session.FieldUpdateTime:
-		m.ResetUpdateTime()
-		return nil
-	case session.FieldUserID:
-		m.ResetUserID()
-		return nil
-	case session.FieldSid:
-		m.ResetSid()
+	case session.FieldData:
+		m.ResetData()
 		return nil
 	case session.FieldExpiry:
 		m.ResetExpiry()
-		return nil
-	case session.FieldDeleted:
-		m.ResetDeleted()
-		return nil
-	case session.FieldType:
-		m.ResetType()
 		return nil
 	}
 	return fmt.Errorf("unknown Session field %s", name)
@@ -1184,28 +938,19 @@ func (m *SessionMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *SessionMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.user != nil {
-		edges = append(edges, session.EdgeUser)
-	}
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *SessionMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case session.EdgeUser:
-		if id := m.user; id != nil {
-			return []ent.Value{*id}
-		}
-	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *SessionMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 0)
 	return edges
 }
 
@@ -1217,42 +962,25 @@ func (m *SessionMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *SessionMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.cleareduser {
-		edges = append(edges, session.EdgeUser)
-	}
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *SessionMutation) EdgeCleared(name string) bool {
-	switch name {
-	case session.EdgeUser:
-		return m.cleareduser
-	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *SessionMutation) ClearEdge(name string) error {
-	switch name {
-	case session.EdgeUser:
-		m.ClearUser()
-		return nil
-	}
 	return fmt.Errorf("unknown Session unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *SessionMutation) ResetEdge(name string) error {
-	switch name {
-	case session.EdgeUser:
-		m.ResetUser()
-		return nil
-	}
 	return fmt.Errorf("unknown Session edge %s", name)
 }
 
@@ -1270,9 +998,6 @@ type UserMutation struct {
 	last_name       *string
 	phone_number    *string
 	clearedFields   map[string]struct{}
-	sessions        map[int]struct{}
-	removedsessions map[int]struct{}
-	clearedsessions bool
 	posts           map[int64]struct{}
 	removedposts    map[int64]struct{}
 	clearedposts    bool
@@ -1637,60 +1362,6 @@ func (m *UserMutation) ResetPhoneNumber() {
 	m.phone_number = nil
 }
 
-// AddSessionIDs adds the "sessions" edge to the Session entity by ids.
-func (m *UserMutation) AddSessionIDs(ids ...int) {
-	if m.sessions == nil {
-		m.sessions = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.sessions[ids[i]] = struct{}{}
-	}
-}
-
-// ClearSessions clears the "sessions" edge to the Session entity.
-func (m *UserMutation) ClearSessions() {
-	m.clearedsessions = true
-}
-
-// SessionsCleared reports if the "sessions" edge to the Session entity was cleared.
-func (m *UserMutation) SessionsCleared() bool {
-	return m.clearedsessions
-}
-
-// RemoveSessionIDs removes the "sessions" edge to the Session entity by IDs.
-func (m *UserMutation) RemoveSessionIDs(ids ...int) {
-	if m.removedsessions == nil {
-		m.removedsessions = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.sessions, ids[i])
-		m.removedsessions[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedSessions returns the removed IDs of the "sessions" edge to the Session entity.
-func (m *UserMutation) RemovedSessionsIDs() (ids []int) {
-	for id := range m.removedsessions {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// SessionsIDs returns the "sessions" edge IDs in the mutation.
-func (m *UserMutation) SessionsIDs() (ids []int) {
-	for id := range m.sessions {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetSessions resets all changes to the "sessions" edge.
-func (m *UserMutation) ResetSessions() {
-	m.sessions = nil
-	m.clearedsessions = false
-	m.removedsessions = nil
-}
-
 // AddPostIDs adds the "posts" edge to the Post entity by ids.
 func (m *UserMutation) AddPostIDs(ids ...int64) {
 	if m.posts == nil {
@@ -1965,10 +1636,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.sessions != nil {
-		edges = append(edges, user.EdgeSessions)
-	}
+	edges := make([]string, 0, 1)
 	if m.posts != nil {
 		edges = append(edges, user.EdgePosts)
 	}
@@ -1979,12 +1647,6 @@ func (m *UserMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case user.EdgeSessions:
-		ids := make([]ent.Value, 0, len(m.sessions))
-		for id := range m.sessions {
-			ids = append(ids, id)
-		}
-		return ids
 	case user.EdgePosts:
 		ids := make([]ent.Value, 0, len(m.posts))
 		for id := range m.posts {
@@ -1997,10 +1659,7 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.removedsessions != nil {
-		edges = append(edges, user.EdgeSessions)
-	}
+	edges := make([]string, 0, 1)
 	if m.removedposts != nil {
 		edges = append(edges, user.EdgePosts)
 	}
@@ -2011,12 +1670,6 @@ func (m *UserMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case user.EdgeSessions:
-		ids := make([]ent.Value, 0, len(m.removedsessions))
-		for id := range m.removedsessions {
-			ids = append(ids, id)
-		}
-		return ids
 	case user.EdgePosts:
 		ids := make([]ent.Value, 0, len(m.removedposts))
 		for id := range m.removedposts {
@@ -2029,10 +1682,7 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedsessions {
-		edges = append(edges, user.EdgeSessions)
-	}
+	edges := make([]string, 0, 1)
 	if m.clearedposts {
 		edges = append(edges, user.EdgePosts)
 	}
@@ -2043,8 +1693,6 @@ func (m *UserMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
-	case user.EdgeSessions:
-		return m.clearedsessions
 	case user.EdgePosts:
 		return m.clearedposts
 	}
@@ -2063,9 +1711,6 @@ func (m *UserMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *UserMutation) ResetEdge(name string) error {
 	switch name {
-	case user.EdgeSessions:
-		m.ResetSessions()
-		return nil
 	case user.EdgePosts:
 		m.ResetPosts()
 		return nil
