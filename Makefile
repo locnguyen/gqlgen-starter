@@ -43,7 +43,7 @@ migration-hash:
 # If the "dev database" is running from the migration-db target, then this will analyze the code in db/migrations for \
 potentially dangerous changes
 migration-lint:
-	atlas migrate lint --dev-url="postgres://postgres:postgres@localhost:5678/test?sslmode=disable" --dir="file://$(PWD)/db/migrations" --latest=1
+	atlas migrate lint --dev-url=$(TEST_DB_URL) --dir="file://$(PWD)/db/migrations" --latest=1
 
 # Applies the latest migrations in the local development database
 migrate-apply-local:
@@ -51,7 +51,15 @@ migrate-apply-local:
 
 # Applies the latest migrations in the local development database
 migrate-apply-test:
-	atlas migrate apply --dir="file://db/migrations" --url="postgres://postgres:postgres@localhost:5678/test?sslmode=disable"
+	atlas migrate apply --dir="file://db/migrations" --url=$(TEST_DB_URL)
+
+# Nuke the database schema in the local database
+migrate-clean-local:
+	atlas schema clean --url=$(HOST_DB_URL)
+
+# Nuke the database schema in the atlas test database
+migrate-clean-test:
+	atlas schema clean --url=$(TEST_DB_URL)
 
 # Run the API locally in a hot reload environment
 run:

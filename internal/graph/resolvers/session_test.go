@@ -3,11 +3,9 @@ package resolvers
 import (
 	"context"
 	"github.com/99designs/gqlgen/client"
-	"github.com/go-faker/faker/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"testing"
-	"time"
 )
 
 type SessionResolverSuite struct {
@@ -19,34 +17,35 @@ func TestSessionResolverSuite(t *testing.T) {
 	suite.Run(t, &SessionResolverSuite{})
 }
 
-func (suite *SessionResolverSuite) SetupSuite() {
-	suite.TestContext = *InitTestContext(suite.T(), "UserResolverSuite")
+func (s *SessionResolverSuite) SetupSuite() {
+	s.TestContext = *InitTestContext(s.T(), "SessionResolverSuite")
 }
 
-func (suite *SessionResolverSuite) TearDownSuite() {
-	defer suite.pgContainer.Terminate(context.Background())
-	defer suite.AppCtx.DB.Close()
+func (s *SessionResolverSuite) TearDownSuite() {
+	defer s.pgContainer.Terminate(context.Background())
+	defer s.AppCtx.DB.Close()
 }
 
-func (suite *SessionResolverSuite) TestViewerQuery() {
-	u, _ := CreateDummyUser(suite.T(), *suite.AppCtx.EntClient)
+func (s *SessionResolverSuite) TestViewerQuery() {
+	u, _ := CreateDummyUser(s.T(), s.AppCtx.EntClient)
 
-	q := `query { viewer { id email firstName lastName phoneNumber } }`
+	q := `query { viewer { user { id email firstName lastName phoneNumber } } }`
 	var resp struct {
-		Viewer UserObj
+		Viewer struct {
+			User *userObj `json:"user"`
+		} `json:"viewer"`
 	}
 
-	suite.GqlGenClient.MustPost(q, &resp, AddContextUserForTesting(u, nil))
-
-	assert.Equal(suite.T(), u.Email, resp.Viewer.Email)
-	assert.Equal(suite.T(), u.FirstName, resp.Viewer.FirstName)
-	assert.Equal(suite.T(), u.LastName, resp.Viewer.LastName)
-	assert.Equal(suite.T(), u.PhoneNumber, resp.Viewer.PhoneNumber)
+	s.GqlGenClient.MustPost(q, &resp, AddContextViewerForTesting(u))
+	assert.NotNil(s.T(), resp.Viewer.User)
+	assert.Equal(s.T(), u.Email, resp.Viewer.User.Email)
+	assert.Equal(s.T(), u.FirstName, resp.Viewer.User.FirstName)
+	assert.Equal(s.T(), u.LastName, resp.Viewer.User.LastName)
+	assert.Equal(s.T(), u.PhoneNumber, resp.Viewer.User.PhoneNumber)
 }
 
-func (suite *SessionResolverSuite) TestCreateSessionMutation() {
-	u, pw := CreateDummyUser(suite.T(), *suite.AppCtx.EntClient)
-	suite.AppCtx.Logger.Debug().Str("password", pw).Msg("Created dummy user with password")
+func (s *SessionResolverSuite) TestCreateSessionMutation() {
+	u, pw := CreateDummyUser(s.T(), s.AppCtx.EntClient)
 	q := `
 		mutation ($input: CreateSessionInput!) {
 			createSession(input: $input) {
@@ -72,34 +71,22 @@ func (suite *SessionResolverSuite) TestCreateSessionMutation() {
 		Password: pw,
 	}
 
-	suite.AppCtx.Logger.Debug().Interface("input", i).Msg("creds")
-	suite.GqlGenClient.MustPost(q, &resp, client.Var("input", i), AddContextUserForTesting(nil, nil))
+	s.GqlGenClient.MustPost(q, &resp, client.Var("input", i), AddContextViewerForTesting(nil))
 
-	assert.NotEmpty(suite.T(), resp.CreateSession.Token)
-	assert.NotEmpty(suite.T(), resp.CreateSession.Expiry)
+	assert.NotEmpty(s.T(), resp.CreateSession.Token)
+	assert.NotEmpty(s.T(), resp.CreateSession.Expiry)
 }
 
-func (suite *SessionResolverSuite) TestDeleteSessionMutation() {
-	u, _ := CreateDummyUser(suite.T(), *suite.AppCtx.EntClient)
+func (s *SessionResolverSuite) TestDeleteSessionMutation() {
+	u, _ := CreateDummyUser(s.T(), s.AppCtx.EntClient)
 	var resp struct {
 		DeleteSession bool `json:"deleteSession"`
 	}
 
-	sess, err := suite.AppCtx.EntClient.Session.Create().
-		SetData([]byte("hi")).
-		SetToken(faker.UUIDHyphenated()).
-		SetExpiry(time.Now().Add(1 * time.Hour)).
-		Save(context.Background())
-
+	err := s.GqlGenClient.Post(`mutation { deleteSession }`, &resp, func(bd *client.Request) {}, AddContextViewerForTesting(u))
 	if err != nil {
-		suite.T().Error(err)
+		s.T().Error(err)
 	}
 
-	err = suite.GqlGenClient.Post(`mutation { deleteSession }`, &resp, func(bd *client.Request) {}, AddContextUserForTesting(u, &sess.Token))
-	if err != nil {
-		suite.AppCtx.Logger.Error().Err(err).Msg("Error POSTing deleteSession")
-		suite.T().Error(err)
-	}
-
-	assert.True(suite.T(), resp.DeleteSession)
+	assert.True(s.T(), resp.DeleteSession)
 }

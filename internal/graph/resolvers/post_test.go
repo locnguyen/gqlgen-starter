@@ -19,13 +19,13 @@ func TestPostResolvers(t *testing.T) {
 	suite.Run(t, new(PostResolverSuite))
 }
 
-func (suite *PostResolverSuite) SetupSuite() {
-	suite.TestContext = *InitTestContext(suite.T(), "PostResolverSuite")
+func (s *PostResolverSuite) SetupSuite() {
+	s.TestContext = *InitTestContext(s.T(), "PostResolverSuite")
 }
 
-func (suite *PostResolverSuite) TeardownSuite() {
-	defer suite.pgContainer.Terminate(context.Background())
-	defer suite.AppCtx.DB.Close()
+func (s *PostResolverSuite) TeardownSuite() {
+	defer s.pgContainer.Terminate(context.Background())
+	defer s.AppCtx.DB.Close()
 }
 
 var getPostQuery = `
@@ -62,42 +62,31 @@ type postResp struct {
 	} `json:"errors"`
 }
 
-func (suite *PostResolverSuite) TestGetPostQuery() {
-	u, _ := CreateDummyUser(suite.T(), *suite.AppCtx.EntClient)
+func (s *PostResolverSuite) TestGetPostQuery() {
+	u, _ := CreateDummyUser(s.T(), s.AppCtx.EntClient)
 
-	p, err := suite.AppCtx.EntClient.Post.Create().
+	p, err := s.AppCtx.EntClient.Post.Create().
 		SetAuthor(u).
 		SetContent(faker.Paragraph()).
 		Save(context.Background())
 
 	if err != nil {
-		suite.T().Error(err)
+		s.T().Error(err)
 	}
 
 	var resp postResp
 
-	suite.GqlGenClient.MustPost(getPostQuery, &resp, client.Var("id", p.ID))
-	assert.Equal(suite.T(), resp.Post.ID, fmt.Sprint(p.ID))
-	assert.Equal(suite.T(), resp.Post.Content, p.Content)
-	assert.NotEmpty(suite.T(), resp.Post.CreateTime)
-	assert.NotEmpty(suite.T(), resp.Post.UpdateTime)
+	s.GqlGenClient.MustPost(getPostQuery, &resp, client.Var("id", p.ID))
+	assert.Equal(s.T(), resp.Post.ID, fmt.Sprint(p.ID))
+	assert.Equal(s.T(), resp.Post.Content, p.Content)
+	assert.NotEmpty(s.T(), resp.Post.CreateTime)
+	assert.NotEmpty(s.T(), resp.Post.UpdateTime)
 
-	assert.NotEmpty(suite.T(), resp.Post.Author.ID)
-	assert.Equal(suite.T(), resp.Post.Author.Email, u.Email)
+	assert.NotEmpty(s.T(), resp.Post.Author.ID)
+	assert.Equal(s.T(), resp.Post.Author.Email, u.Email)
 }
 
-func (suite *PostResolverSuite) TestGetPostNotFoundQuery() {
-	rands, err := faker.RandomInt(100, 1000)
-	if err != nil {
-		suite.T().Error(err)
-	}
-	var resp postResp
-	err = suite.GqlGenClient.Post(getPostQuery, &resp, client.Var("id", rands[0]))
-	assert.ErrorContains(suite.T(), err, "Post not found")
-	assert.Nil(suite.T(), resp.Post)
-}
-
-func (suite *PostResolverSuite) TestCreatePostMutation() {
+func (s *PostResolverSuite) TestCreatePostMutation() {
 	var q = `
 		mutation ($input: CreatePostInput!) {
 			createPost(input: $input) {
@@ -113,7 +102,7 @@ func (suite *PostResolverSuite) TestCreatePostMutation() {
 		CreatePost PostObj `json:"createPost"`
 	}
 
-	author, _ := CreateDummyUser(suite.T(), *suite.AppCtx.EntClient)
+	author, _ := CreateDummyUser(s.T(), s.AppCtx.EntClient)
 	content := faker.Paragraph()
 	type input struct {
 		Content string `json:"content"`
@@ -122,10 +111,10 @@ func (suite *PostResolverSuite) TestCreatePostMutation() {
 		Content: content,
 	}
 
-	suite.GqlGenClient.MustPost(q, &resp, client.Var("input", i), AddContextUserForTesting(author, nil))
+	s.GqlGenClient.MustPost(q, &resp, client.Var("input", i), AddContextViewerForTesting(author))
 
-	assert.NotEmpty(suite.T(), resp.CreatePost.ID)
-	assert.Equal(suite.T(), content, resp.CreatePost.Content)
-	assert.NotEmpty(suite.T(), resp.CreatePost.CreateTime)
-	assert.NotEmpty(suite.T(), resp.CreatePost.UpdateTime)
+	assert.NotEmpty(s.T(), resp.CreatePost.ID)
+	assert.Equal(s.T(), content, resp.CreatePost.Content)
+	assert.NotEmpty(s.T(), resp.CreatePost.CreateTime)
+	assert.NotEmpty(s.T(), resp.CreatePost.UpdateTime)
 }

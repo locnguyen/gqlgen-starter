@@ -1,0 +1,6 @@
+{{ define "model/fields/additional" }}
+    {{- if eq $.Name "Token" }}
+        // StaticField defined by template.
+        Plaintext string `json:"static,omitempty"`
+    {{- end }}
+{{ end }}

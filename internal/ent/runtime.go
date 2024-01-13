@@ -5,7 +5,6 @@ package ent
 import (
 	"gqlgen-starter/internal/ent/post"
 	"gqlgen-starter/internal/ent/schema"
-	"gqlgen-starter/internal/ent/session"
 	"gqlgen-starter/internal/ent/user"
 	"time"
 )
@@ -29,16 +28,6 @@ func init() {
 	post.DefaultUpdateTime = postDescUpdateTime.Default.(func() time.Time)
 	// post.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
 	post.UpdateDefaultUpdateTime = postDescUpdateTime.UpdateDefault.(func() time.Time)
-	sessionFields := schema.Session{}.Fields()
-	_ = sessionFields
-	// sessionDescToken is the schema descriptor for token field.
-	sessionDescToken := sessionFields[0].Descriptor()
-	// session.TokenValidator is a validator for the "token" field. It is called by the builders before save.
-	session.TokenValidator = sessionDescToken.Validators[0].(func(string) error)
-	// sessionDescData is the schema descriptor for data field.
-	sessionDescData := sessionFields[1].Descriptor()
-	// session.DataValidator is a validator for the "data" field. It is called by the builders before save.
-	session.DataValidator = sessionDescData.Validators[0].(func([]byte) error)
 	userMixin := schema.User{}.Mixin()
 	userMixinFields0 := userMixin[0].Fields()
 	_ = userMixinFields0

@@ -65,41 +65,8 @@ func (pu *PostUpdate) ClearAuthor() *PostUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (pu *PostUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
 	pu.defaults()
-	if len(pu.hooks) == 0 {
-		if err = pu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = pu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*PostMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = pu.check(); err != nil {
-				return 0, err
-			}
-			pu.mutation = mutation
-			affected, err = pu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(pu.hooks) - 1; i >= 0; i-- {
-			if pu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = pu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, pu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks(ctx, pu.sqlSave, pu.mutation, pu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -141,16 +108,10 @@ func (pu *PostUpdate) check() error {
 }
 
 func (pu *PostUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   post.Table,
-			Columns: post.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: post.FieldID,
-			},
-		},
+	if err := pu.check(); err != nil {
+		return n, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(post.Table, post.Columns, sqlgraph.NewFieldSpec(post.FieldID, field.TypeInt64))
 	if ps := pu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -159,18 +120,10 @@ func (pu *PostUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := pu.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: post.FieldUpdateTime,
-		})
+		_spec.SetField(post.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := pu.mutation.Content(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: post.FieldContent,
-		})
+		_spec.SetField(post.FieldContent, field.TypeString, value)
 	}
 	if pu.mutation.AuthorCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -180,10 +133,7 @@ func (pu *PostUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{post.AuthorColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -196,10 +146,7 @@ func (pu *PostUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{post.AuthorColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -215,6 +162,7 @@ func (pu *PostUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	pu.mutation.done = true
 	return n, nil
 }
 
@@ -260,6 +208,12 @@ func (puo *PostUpdateOne) ClearAuthor() *PostUpdateOne {
 	return puo
 }
 
+// Where appends a list predicates to the PostUpdate builder.
+func (puo *PostUpdateOne) Where(ps ...predicate.Post) *PostUpdateOne {
+	puo.mutation.Where(ps...)
+	return puo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (puo *PostUpdateOne) Select(field string, fields ...string) *PostUpdateOne {
@@ -269,47 +223,8 @@ func (puo *PostUpdateOne) Select(field string, fields ...string) *PostUpdateOne 
 
 // Save executes the query and returns the updated Post entity.
 func (puo *PostUpdateOne) Save(ctx context.Context) (*Post, error) {
-	var (
-		err  error
-		node *Post
-	)
 	puo.defaults()
-	if len(puo.hooks) == 0 {
-		if err = puo.check(); err != nil {
-			return nil, err
-		}
-		node, err = puo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*PostMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = puo.check(); err != nil {
-				return nil, err
-			}
-			puo.mutation = mutation
-			node, err = puo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(puo.hooks) - 1; i >= 0; i-- {
-			if puo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = puo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, puo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Post)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from PostMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks(ctx, puo.sqlSave, puo.mutation, puo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -351,16 +266,10 @@ func (puo *PostUpdateOne) check() error {
 }
 
 func (puo *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   post.Table,
-			Columns: post.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt64,
-				Column: post.FieldID,
-			},
-		},
+	if err := puo.check(); err != nil {
+		return _node, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(post.Table, post.Columns, sqlgraph.NewFieldSpec(post.FieldID, field.TypeInt64))
 	id, ok := puo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Post.id" for update`)}
@@ -386,18 +295,10 @@ func (puo *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) 
 		}
 	}
 	if value, ok := puo.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: post.FieldUpdateTime,
-		})
+		_spec.SetField(post.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := puo.mutation.Content(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: post.FieldContent,
-		})
+		_spec.SetField(post.FieldContent, field.TypeString, value)
 	}
 	if puo.mutation.AuthorCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -407,10 +308,7 @@ func (puo *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) 
 			Columns: []string{post.AuthorColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt64),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -423,10 +321,7 @@ func (puo *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) 
 			Columns: []string{post.AuthorColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt64,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt64),
 			},
 		}
 		for _, k := range nodes {
@@ -445,5 +340,6 @@ func (puo *PostUpdateOne) sqlSave(ctx context.Context) (_node *Post, err error) 
 		}
 		return nil, err
 	}
+	puo.mutation.done = true
 	return _node, nil
 }

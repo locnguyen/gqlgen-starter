@@ -1,0 +1,3 @@
+CREATE SCHEMA IF NOT EXISTS public;
+
+CREATE SEQUENCE global_id_seq;

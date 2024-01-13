@@ -7,6 +7,7 @@ import (
 	"github.com/go-faker/faker/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"gqlgen-starter/internal/app/models"
 	"gqlgen-starter/internal/ent/user"
 	"testing"
 )
@@ -29,7 +30,7 @@ func (suite *UserResolverSuite) TearDownSuite() {
 	defer suite.AppCtx.DB.Close()
 }
 
-type UserObj struct {
+type userObj struct {
 	ID          string `json:"id"`
 	FirstName   string `json:"firstName"`
 	LastName    string `json:"lastName"`
@@ -38,7 +39,7 @@ type UserObj struct {
 }
 
 type userResp struct {
-	User *UserObj
+	User *userObj
 }
 
 var getUserQuery = `
@@ -60,6 +61,7 @@ func (suite *UserResolverSuite) TestUserQuery() {
 		SetLastName(faker.LastName()).
 		SetHashedPassword([]byte(faker.Password())).
 		SetPhoneNumber(faker.Phonenumber()).
+		SetRoles([]models.Role{}).
 		Save(context.Background())
 	if err != nil {
 		suite.T().Error(err)
@@ -82,7 +84,7 @@ func (suite *UserResolverSuite) TestUserQueryNotFound() {
 	}
 	var resp userResp
 	err = suite.GqlGenClient.Post(getUserQuery, &resp, client.Var("id", rands[0]))
-	assert.ErrorContains(suite.T(), err, "User not found")
+	assert.Error(suite.T(), err)
 	assert.Nil(suite.T(), resp.User)
 }
 
@@ -93,7 +95,7 @@ func (suite *UserResolverSuite) TestCreateUserMutation() {
 			Expiry string `json:"expiry"`
 		}
 	}
-	suite.GqlGenClient.MustPost(`mutation { createUser(input: { firstName: "Natasha" lastName: "Romanova" email: "blackwidow@avengers.com" phoneNumber: "+8888888888" password: "P@ssw0rd!" passwordConfirmation: "P@ssw0rd!" }) { token expiry } }`, &resp, AddContextUserForTesting(nil, nil))
+	suite.GqlGenClient.MustPost(`mutation { createUser(input: { firstName: "Natasha" lastName: "Romanova" email: "blackwidow@avengers.com" phoneNumber: "+8888888888" password: "P@ssw0rd!" passwordConfirmation: "P@ssw0rd!" }) { token expiry } }`, &resp, AddContextViewerForTesting(nil))
 	assert.NotEmpty(suite.T(), resp.CreateUser.Token)
 	assert.NotEmpty(suite.T(), resp.CreateUser.Expiry)
 

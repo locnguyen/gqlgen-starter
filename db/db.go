@@ -1,30 +1,65 @@
 package db
 
 import (
+	"context"
 	"database/sql"
-	"entgo.io/ent/dialect"
-	entsql "entgo.io/ent/dialect/sql"
+	"github.com/gomodule/redigo/redis"
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
-	"gqlgen-starter/internal/ent"
+	"gqlgen-starter/config"
 )
 
-func OpenConnection(logger *zerolog.Logger, databaseURL string) (*sql.DB, *ent.Client, error) {
-	logger.Info().Msg("Trying to open database connection...")
+func OpenPostgresConn(ctx context.Context, databaseURL string) (*sql.DB, error) {
+	log := zerolog.Ctx(ctx)
+	log.Info().
+		Msg("opening database connection...")
 
 	conn, err := sql.Open("pgx", databaseURL)
 	if err != nil {
-		logger.Error().Err(err).Msgf("Could not connect to Postgres")
-		return nil, nil, err
+		log.Error().
+			Err(err).
+			Msgf("could not connect to Postgres")
+		return nil, err
 	}
 
-	logger.Info().Msg("Trying to ping DB...")
+	log.Info().
+		Msg("pinging Postgres...")
 	if err := conn.Ping(); err != nil {
-		logger.Error().Err(err).Msg("Could not ping DB after opening connection")
-		return nil, nil, err
+		log.Error().
+			Err(err).
+			Msg("🚨️   could not ping Postgres after opening connection")
+		return nil, err
 	}
-	logger.Info().Msg("Database ping succeeded")
+	log.Info().Msg("☎️️   Postgres ping succeeded!")
 
-	entClient := ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, conn)))
-	return conn, entClient, nil
+	return conn, nil
+}
+
+func NewRedisPool(ctx context.Context, cfg config.ApplicationConfig) (*redis.Pool, error) {
+	log := zerolog.Ctx(ctx)
+	if cfg.RedisURL == "" {
+		log.Error().
+			Msg("🚨️   environment variable REDIS_URL not set")
+		return nil, errors.New("REDIS_URL not set")
+	}
+
+	log.Info().
+		Msg("🏗️  creating Redis connection pool")
+	return &redis.Pool{
+		MaxIdle:   80,
+		MaxActive: 12000, // max number of connections
+		Dial: func() (redis.Conn, error) {
+			c, err := redis.Dial("tcp", cfg.RedisURL, redis.DialPassword(cfg.RedisAuth))
+			if err != nil {
+				log.Error().
+					Err(err).
+					Msgf("🚨️   error connecting to Redis from pool: %s", cfg.RedisURL)
+				panic(err.Error())
+			}
+			log.Info().
+				Msgf("☎️   connected to Redis from pool: %s", cfg.RedisURL)
+			return c, err
+		},
+	}, nil
 }

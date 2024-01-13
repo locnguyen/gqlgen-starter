@@ -12,364 +12,232 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id int64) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Post(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id int64) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Post(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id int64) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.Post(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int64) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.Post(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int64) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.Post(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id int64) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.Post(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id int64) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.Post(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id int64) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.Post(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id int64) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.Post(sql.FieldLTE(FieldID, id))
 }
 
 // CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
 func CreateTime(v time.Time) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreateTime), v))
-	})
+	return predicate.Post(sql.FieldEQ(FieldCreateTime, v))
 }
 
 // UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
 func UpdateTime(v time.Time) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Post(sql.FieldEQ(FieldUpdateTime, v))
 }
 
 // AuthorID applies equality check predicate on the "author_id" field. It's identical to AuthorIDEQ.
 func AuthorID(v int64) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAuthorID), v))
-	})
+	return predicate.Post(sql.FieldEQ(FieldAuthorID, v))
 }
 
 // Content applies equality check predicate on the "content" field. It's identical to ContentEQ.
 func Content(v string) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldContent), v))
-	})
+	return predicate.Post(sql.FieldEQ(FieldContent, v))
 }
 
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
 func CreateTimeEQ(v time.Time) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreateTime), v))
-	})
+	return predicate.Post(sql.FieldEQ(FieldCreateTime, v))
 }
 
 // CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
 func CreateTimeNEQ(v time.Time) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCreateTime), v))
-	})
+	return predicate.Post(sql.FieldNEQ(FieldCreateTime, v))
 }
 
 // CreateTimeIn applies the In predicate on the "create_time" field.
 func CreateTimeIn(vs ...time.Time) predicate.Post {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldCreateTime), v...))
-	})
+	return predicate.Post(sql.FieldIn(FieldCreateTime, vs...))
 }
 
 // CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
 func CreateTimeNotIn(vs ...time.Time) predicate.Post {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldCreateTime), v...))
-	})
+	return predicate.Post(sql.FieldNotIn(FieldCreateTime, vs...))
 }
 
 // CreateTimeGT applies the GT predicate on the "create_time" field.
 func CreateTimeGT(v time.Time) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCreateTime), v))
-	})
+	return predicate.Post(sql.FieldGT(FieldCreateTime, v))
 }
 
 // CreateTimeGTE applies the GTE predicate on the "create_time" field.
 func CreateTimeGTE(v time.Time) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCreateTime), v))
-	})
+	return predicate.Post(sql.FieldGTE(FieldCreateTime, v))
 }
 
 // CreateTimeLT applies the LT predicate on the "create_time" field.
 func CreateTimeLT(v time.Time) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCreateTime), v))
-	})
+	return predicate.Post(sql.FieldLT(FieldCreateTime, v))
 }
 
 // CreateTimeLTE applies the LTE predicate on the "create_time" field.
 func CreateTimeLTE(v time.Time) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCreateTime), v))
-	})
+	return predicate.Post(sql.FieldLTE(FieldCreateTime, v))
 }
 
 // UpdateTimeEQ applies the EQ predicate on the "update_time" field.
 func UpdateTimeEQ(v time.Time) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Post(sql.FieldEQ(FieldUpdateTime, v))
 }
 
 // UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
 func UpdateTimeNEQ(v time.Time) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Post(sql.FieldNEQ(FieldUpdateTime, v))
 }
 
 // UpdateTimeIn applies the In predicate on the "update_time" field.
 func UpdateTimeIn(vs ...time.Time) predicate.Post {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldUpdateTime), v...))
-	})
+	return predicate.Post(sql.FieldIn(FieldUpdateTime, vs...))
 }
 
 // UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
 func UpdateTimeNotIn(vs ...time.Time) predicate.Post {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldUpdateTime), v...))
-	})
+	return predicate.Post(sql.FieldNotIn(FieldUpdateTime, vs...))
 }
 
 // UpdateTimeGT applies the GT predicate on the "update_time" field.
 func UpdateTimeGT(v time.Time) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Post(sql.FieldGT(FieldUpdateTime, v))
 }
 
 // UpdateTimeGTE applies the GTE predicate on the "update_time" field.
 func UpdateTimeGTE(v time.Time) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Post(sql.FieldGTE(FieldUpdateTime, v))
 }
 
 // UpdateTimeLT applies the LT predicate on the "update_time" field.
 func UpdateTimeLT(v time.Time) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Post(sql.FieldLT(FieldUpdateTime, v))
 }
 
 // UpdateTimeLTE applies the LTE predicate on the "update_time" field.
 func UpdateTimeLTE(v time.Time) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Post(sql.FieldLTE(FieldUpdateTime, v))
 }
 
 // AuthorIDEQ applies the EQ predicate on the "author_id" field.
 func AuthorIDEQ(v int64) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAuthorID), v))
-	})
+	return predicate.Post(sql.FieldEQ(FieldAuthorID, v))
 }
 
 // AuthorIDNEQ applies the NEQ predicate on the "author_id" field.
 func AuthorIDNEQ(v int64) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldAuthorID), v))
-	})
+	return predicate.Post(sql.FieldNEQ(FieldAuthorID, v))
 }
 
 // AuthorIDIn applies the In predicate on the "author_id" field.
 func AuthorIDIn(vs ...int64) predicate.Post {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldAuthorID), v...))
-	})
+	return predicate.Post(sql.FieldIn(FieldAuthorID, vs...))
 }
 
 // AuthorIDNotIn applies the NotIn predicate on the "author_id" field.
 func AuthorIDNotIn(vs ...int64) predicate.Post {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldAuthorID), v...))
-	})
+	return predicate.Post(sql.FieldNotIn(FieldAuthorID, vs...))
 }
 
 // ContentEQ applies the EQ predicate on the "content" field.
 func ContentEQ(v string) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldContent), v))
-	})
+	return predicate.Post(sql.FieldEQ(FieldContent, v))
 }
 
 // ContentNEQ applies the NEQ predicate on the "content" field.
 func ContentNEQ(v string) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldContent), v))
-	})
+	return predicate.Post(sql.FieldNEQ(FieldContent, v))
 }
 
 // ContentIn applies the In predicate on the "content" field.
 func ContentIn(vs ...string) predicate.Post {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldContent), v...))
-	})
+	return predicate.Post(sql.FieldIn(FieldContent, vs...))
 }
 
 // ContentNotIn applies the NotIn predicate on the "content" field.
 func ContentNotIn(vs ...string) predicate.Post {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldContent), v...))
-	})
+	return predicate.Post(sql.FieldNotIn(FieldContent, vs...))
 }
 
 // ContentGT applies the GT predicate on the "content" field.
 func ContentGT(v string) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldContent), v))
-	})
+	return predicate.Post(sql.FieldGT(FieldContent, v))
 }
 
 // ContentGTE applies the GTE predicate on the "content" field.
 func ContentGTE(v string) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldContent), v))
-	})
+	return predicate.Post(sql.FieldGTE(FieldContent, v))
 }
 
 // ContentLT applies the LT predicate on the "content" field.
 func ContentLT(v string) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldContent), v))
-	})
+	return predicate.Post(sql.FieldLT(FieldContent, v))
 }
 
 // ContentLTE applies the LTE predicate on the "content" field.
 func ContentLTE(v string) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldContent), v))
-	})
+	return predicate.Post(sql.FieldLTE(FieldContent, v))
 }
 
 // ContentContains applies the Contains predicate on the "content" field.
 func ContentContains(v string) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldContent), v))
-	})
+	return predicate.Post(sql.FieldContains(FieldContent, v))
 }
 
 // ContentHasPrefix applies the HasPrefix predicate on the "content" field.
 func ContentHasPrefix(v string) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldContent), v))
-	})
+	return predicate.Post(sql.FieldHasPrefix(FieldContent, v))
 }
 
 // ContentHasSuffix applies the HasSuffix predicate on the "content" field.
 func ContentHasSuffix(v string) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldContent), v))
-	})
+	return predicate.Post(sql.FieldHasSuffix(FieldContent, v))
 }
 
 // ContentEqualFold applies the EqualFold predicate on the "content" field.
 func ContentEqualFold(v string) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldContent), v))
-	})
+	return predicate.Post(sql.FieldEqualFold(FieldContent, v))
 }
 
 // ContentContainsFold applies the ContainsFold predicate on the "content" field.
 func ContentContainsFold(v string) predicate.Post {
-	return predicate.Post(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldContent), v))
-	})
+	return predicate.Post(sql.FieldContainsFold(FieldContent, v))
 }
 
 // HasAuthor applies the HasEdge predicate on the "author" edge.
@@ -377,7 +245,6 @@ func HasAuthor() predicate.Post {
 	return predicate.Post(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(AuthorTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, AuthorTable, AuthorColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -387,11 +254,7 @@ func HasAuthor() predicate.Post {
 // HasAuthorWith applies the HasEdge predicate on the "author" edge with a given conditions (other predicates).
 func HasAuthorWith(preds ...predicate.User) predicate.Post {
 	return predicate.Post(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(AuthorInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, AuthorTable, AuthorColumn),
-		)
+		step := newAuthorStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

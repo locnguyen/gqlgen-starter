@@ -6,6 +6,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"entgo.io/ent/schema/mixin"
+	"gqlgen-starter/internal/app/models"
 )
 
 // User holds the schema definition for the User entity.
@@ -23,6 +24,7 @@ func (User) Fields() []ent.Field {
 		field.String("first_name"),
 		field.String("last_name"),
 		field.String("phone_number"),
+		field.JSON("roles", []models.Role{}),
 	}
 }
 

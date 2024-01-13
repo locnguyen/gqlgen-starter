@@ -3,9 +3,10 @@ package resolvers
 import (
 	"context"
 	"encoding/gob"
+	"entgo.io/ent/dialect"
+	entsql "entgo.io/ent/dialect/sql"
 	"fmt"
 	"github.com/99designs/gqlgen/client"
-	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-faker/faker/v4"
 	"github.com/rs/zerolog"
@@ -14,10 +15,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gqlgen-starter/db"
 	"gqlgen-starter/internal/app"
+	"gqlgen-starter/internal/app/models"
 	"gqlgen-starter/internal/ent"
+	"gqlgen-starter/internal/graph/directives"
 	"gqlgen-starter/internal/graph/generated"
-	"gqlgen-starter/internal/middleware"
-	"os"
 	"testing"
 )
 
@@ -27,32 +28,26 @@ type TestContext struct {
 	pgContainer  testcontainers.Container
 }
 
-// In the real server a ContextCookie is always created in the CookieAuth middleware
-// In unit tests this does not happen upstream, so we need to provide it
-func AddContextUserForTesting(user *ent.User, sid *string) client.Option {
+func AddContextViewerForTesting(u *ent.User) client.Option {
 	return func(bd *client.Request) {
-		//ctxCookie := &middleware.ContextCookie{
-		//	User:   user,
-		//	Writer: httptest.NewRecorder(),
-		//	Sid:    sid,
-		//}
-
-		ctx := context.WithValue(context.Background(), middleware.ContextUserKey, user)
+		ctx := context.WithValue(context.Background(), ent.ContextViewerKey, &ent.Viewer{User: u})
 		bd.HTTP = bd.HTTP.WithContext(ctx)
 	}
 }
 
 func InitTestContext(t *testing.T, testName string) *TestContext {
-	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout})
+	log := app.GetLogger()
 	ctx := context.Background()
-
-	postgresC, databaseURL, err := StartPgContainer(&logger, fmt.Sprintf("%s_db", testName))
+	postgresC, databaseURL, err := StartPgContainer(ctx, fmt.Sprintf("%s_db", testName))
 	if err != nil {
 		t.Error(err)
 	}
 
-	dbConn, entClient, err := db.OpenConnection(&logger, *databaseURL)
-
+	dbConn, err := db.OpenPostgresConn(ctx, *databaseURL)
+	if err != nil {
+		t.Error(err)
+	}
+	entClient := ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, dbConn)))
 	if err := entClient.Schema.Create(ctx); err != nil {
 		t.Fatal(err)
 	}
@@ -62,11 +57,17 @@ func InitTestContext(t *testing.T, testName string) *TestContext {
 	appCtx := &app.AppContext{
 		DB:             dbConn,
 		EntClient:      entClient,
-		Logger:         &logger,
+		Logger:         &log,
 		SessionManager: sessionManager,
 	}
 
-	gqlGenClient := client.New(sessionManager.LoadAndSave(handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: NewRootResolver(appCtx)}))))
+	schemaConfig := generated.Config{
+		Resolvers:  NewRootResolver(appCtx),
+		Directives: *directives.NewDirectiveRoot(),
+	}
+
+	gqlServer := CreateGqlServer(appCtx, &schemaConfig)
+	gqlGenClient := client.New(appCtx.SessionManager.LoadAndSave(gqlServer))
 
 	return &TestContext{
 		GqlGenClient: gqlGenClient,
@@ -75,8 +76,8 @@ func InitTestContext(t *testing.T, testName string) *TestContext {
 	}
 }
 
-func StartPgContainer(logger testcontainers.Logging, containerName string) (testcontainers.Container, *string, error) {
-	ctx := context.Background()
+func StartPgContainer(ctx context.Context, containerName string) (testcontainers.Container, *string, error) {
+	log := zerolog.Ctx(ctx)
 	postgresC, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: testcontainers.ContainerRequest{
 			Image:        "postgres:13-alpine",
@@ -84,25 +85,29 @@ func StartPgContainer(logger testcontainers.Logging, containerName string) (test
 			WaitingFor:   wait.ForExposedPort(),
 			Name:         containerName,
 			Env: map[string]string{
-				"POSTGRES_PASSWORD": "postgres",
+				"POSTGRES_PASSWORD": "password",
 				"POSTGRES_USER":     "postgres",
 				"POSTGRES_DB":       "test",
 			},
 		},
 		Started:      true,
 		ProviderType: 0,
-		Logger:       logger,
+		Logger:       log,
 		Reuse:        true,
 	})
 
 	if err != nil {
-		logger.Printf("Error starting Postgres container for integration testing")
+		log.Error().
+			Err(err).
+			Msg("starting Postgres container for testing")
 		return nil, nil, err
 	}
 
 	mappedPort, err := postgresC.MappedPort(ctx, "5432")
 	if err != nil {
-		logger.Printf("Error geting mapped port for test DB container")
+		log.Error().
+			Err(err).
+			Msg("getting mapped port for test DB container")
 		return nil, nil, err
 	}
 
@@ -111,7 +116,7 @@ func StartPgContainer(logger testcontainers.Logging, containerName string) (test
 	return postgresC, &databaseURL, nil
 }
 
-func CreateDummyUser(t *testing.T, client ent.Client) (*ent.User, string) {
+func CreateDummyUser(t *testing.T, client *ent.Client) (*ent.User, string) {
 	pw := faker.Password()
 	hashedPw, err := bcrypt.GenerateFromPassword([]byte(pw), bcrypt.DefaultCost)
 	if err != nil {
@@ -123,6 +128,7 @@ func CreateDummyUser(t *testing.T, client ent.Client) (*ent.User, string) {
 		SetLastName(faker.LastName()).
 		SetHashedPassword(hashedPw).
 		SetPhoneNumber(faker.Phonenumber()).
+		SetRoles([]models.Role{models.RoleGenPop}).
 		Save(context.Background())
 
 	if err != nil {

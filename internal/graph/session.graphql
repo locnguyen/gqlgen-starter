@@ -1,18 +1,25 @@
 type Session {
-    token: String!
-    expiry: Time!
+  token: String!
+  expiry: Time!
+}
+
+type Viewer {
+  """
+  User will be defined when viewer has logged in
+  """
+  user: User @goField(forceResolver: true)
 }
 
 input CreateSessionInput {
-    email: String!
-    password: String!
+  email: String!
+  password: String!
 }
 
 extend type Query {
-    viewer: User!
+  viewer: Viewer
 }
 
 extend type Mutation {
-    createSession(input: CreateSessionInput!): Session!
-    deleteSession: Boolean!
+  createSession(input: CreateSessionInput!): Session!
+  deleteSession: Boolean!
 }

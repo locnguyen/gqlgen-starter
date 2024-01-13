@@ -1,6 +1,6 @@
 version: "3.9"
 services:
-  gqlgen-starter-api:
+  api:
     hostname: ${PROJECT_NAME}
     container_name: ${PROJECT_NAME}
     build:
@@ -15,24 +15,35 @@ services:
     volumes:
       - ${PWD:-.}:/home/${PROJECT_NAME}
     depends_on:
-      - gqlgen-starter-api-db
-  gqlgen-starter-api-db:
+      - postgresdb
+      - redisdb
+  postgresdb:
     image: postgres:13-alpine
-    container_name: gqlgen-starter-api-db
-    hostname: gqlgenstarterapidb
+    container_name: postgresdb
+    hostname: postgresdb
     ports:
-      - "5432:5432"
-    env_file: .env
-  test-db:
+      - ${DEVELOPMENTDB_PORT}
+    environment:
+      POSTGRES_DB: development
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_PORT: 5432
+      POSTGRES_HOST: postgresdb
+  postgrestestdb:
     image: postgres:13-alpine
-    container_name: atlas-test-db
-    hostname: atlastestdb
+    container_name: testdb
+    hostname: postgrestestdb
     ports:
       - "5678:5432"
     environment:
       POSTGRES_DB: test
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: password
       POSTGRES_PORT: 5432
-      POSTGRES_HOST: atlastestdb
-
+      POSTGRES_HOST: postgrestestdb
+  redisdb:
+    image: redis:7.2-alpine
+    hostname: redisdb
+    container_name: ${PROJECT_NAME}-redis
+    ports:
+      - ${REDIS_PORT}

@@ -1,26 +1,34 @@
+enum Role {
+  SysAdmin
+  GenPop
+}
+
 type User {
-    id: ID!
-    firstName:   String!
-    lastName:    String!
-    email:       String!
-    phoneNumber: String!
-    createTime: Time!
-    updateTime: Time!
+  id: ID!
+  firstName:   String!
+  lastName:    String!
+  email:       String!
+  phoneNumber: String!
+  roles: [Role]!
+  createTime: Time!
+  updateTime: Time!
+
+  posts: [Post]!
 }
 
 input CreateUserInput {
-    firstName:   String!
-    lastName:    String!
-    email:       String!
-    phoneNumber: String!
-    password: String!
-    passwordConfirmation: String!
+  firstName:   String!
+  lastName:    String!
+  email:       String!
+  phoneNumber: String!
+  password:    String!
+  passwordConfirmation: String!
 }
 
 extend type Query {
-    user(id: ID!): User
+  user(id: ID!): User
 }
 
 extend type Mutation {
-    createUser(input: CreateUserInput!): Session!
+  createUser(input: CreateUserInput!): Session!
 }

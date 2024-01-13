@@ -1,94 +1,92 @@
 package internal
 
 import (
+	"context"
 	"encoding/gob"
+	"entgo.io/ent/dialect"
+	entsql "entgo.io/ent/dialect/sql"
 	"fmt"
-	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/alexedwards/scs/postgresstore"
+	"github.com/alexedwards/scs/redisstore"
 	"github.com/alexedwards/scs/v2"
-	"github.com/rs/zerolog"
 	"gqlgen-starter/cmd/build"
 	"gqlgen-starter/config"
 	"gqlgen-starter/db"
 	"gqlgen-starter/internal/app"
+	"gqlgen-starter/internal/app/loaders"
 	"gqlgen-starter/internal/ent"
+	"gqlgen-starter/internal/graph/directives"
 	"gqlgen-starter/internal/graph/generated"
 	"gqlgen-starter/internal/graph/resolvers"
 	"gqlgen-starter/internal/middleware"
 	"net/http"
-	"os"
 	"time"
 )
 
 var sessionManager *scs.SessionManager
 
 func StartServer() {
-	logger := initZeroLogger()
+	log := app.GetLogger()
 
-	logger.Info().Msg("******************************************")
-	logger.Info().Msgf("\tBuild Version: %s", build.BuildVersion)
-	logger.Info().Msgf("\tBuild Commit: %s", build.BuildCommit)
-	logger.Info().Msgf("\tBuild Time: %s", build.BuildTime)
-	logger.Info().Msg("******************************************")
+	log.Info().Msg("******************************************")
+	log.Info().Msgf("\tBuild Version: %s", build.BuildVersion)
+	log.Info().Msgf("\tBuild Commit: %s", build.BuildCommit)
+	log.Info().Msgf("\tBuild Time: %s", build.BuildTime)
+	log.Info().Msg("******************************************")
 
-	conn, entClient, err := db.OpenConnection(logger, config.Application.DatabaseURL)
+	ctx := log.WithContext(context.Background())
+	pgConn, err := db.OpenPostgresConn(ctx, config.Application.DatabaseURL)
 	if err != nil {
-		logger.Fatal().Err(err).Msg("NO DATABASE CONNECTION")
+		log.Fatal().
+			Err(err).
+			Msg("☠️  NO DATABASE CONNECTION  ☠️")
+		return
+	}
+
+	entClient := ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, pgConn)))
+
+	redisPool, err := db.NewRedisPool(ctx, config.Application)
+	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("💀  Could not create Redis connection pool  💀")
+		return
 	}
 
 	sessionManager = scs.New()
-	sessionManager.Lifetime = 24 * time.Hour
-	sessionManager.Cookie.Name = middleware.SessionCookieName
-	sessionManager.Store = postgresstore.New(conn)
+	sessionManager.Lifetime = 48 * time.Hour
+	sessionManager.Cookie.Name = "session-viewer"
+	sessionManager.Store = redisstore.New(redisPool)
 	gob.Register(&ent.User{})
 
-	appCtx := &app.AppContext{DB: conn, EntClient: entClient, Logger: logger, SessionManager: sessionManager}
+	appCtx := &app.AppContext{
+		DB:             pgConn,
+		EntClient:      entClient,
+		Loaders:        loaders.NewLoaders(entClient),
+		Logger:         &log,
+		SessionManager: sessionManager,
+	}
 
-	rootResolver := resolvers.NewRootResolver(appCtx)
+	schemaConfig := generated.Config{
+		Resolvers:  resolvers.NewRootResolver(appCtx),
+		Directives: *directives.NewDirectiveRoot(),
+	}
+	srv := resolvers.CreateGqlServer(appCtx, &schemaConfig)
 
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: rootResolver}))
-
-	if config.Application.IsDevelopment() {
+	if config.Application.GoEnv == "development" {
 		http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-		logger.Info().Msgf("connect to http://localhost:%s/ for GraphQL playground", config.Application.ServerPort)
+		log.Info().
+			Msgf("connect to http://localhost:%s/ for GraphQL playground", config.Application.ServerPort)
 	}
 
-	http.Handle("/query", sessionManager.LoadAndSave(middleware.AddContextUser(appCtx, srv)))
+	http.Handle("/query", middleware.RefererServer(middleware.CorrelationID(middleware.HttpLogger(sessionManager.LoadAndSave(middleware.AddContextViewer(appCtx, srv))))))
 
-	logger.Info().Msgf("Starting GraphQL API Server at :%s 🚀", config.Application.ServerPort)
+	log.Info().
+		Msgf("🚀  starting GraphQL Server at :%s", config.Application.ServerPort)
+
 	if err = http.ListenAndServe(fmt.Sprintf(":%s", config.Application.ServerPort), nil); err != nil {
-		logger.Fatal().Err(err).Msg("💀  Could not start HTTP server")
+		log.Fatal().
+			Err(err).
+			Msg("💀  could not start HTTP server")
 	}
-}
-
-// This should be called first, so we have a proper logger. Inspiration taken from
-// https://betterstack.com/community/guides/logging/zerolog/
-func initZeroLogger() *zerolog.Logger {
-	logLevel, err := zerolog.ParseLevel(config.Application.LogLevel)
-	if err != nil {
-		logLevel = zerolog.InfoLevel
-	}
-
-	var logger zerolog.Logger
-
-	// Usually we'll always want logs as JSON unless we're working on our local machine
-	if config.Application.StructuredLogging {
-		logger = zerolog.New(os.Stdout).
-			Level(logLevel).
-			With().
-			Timestamp().
-			Str("BuildCommit", build.BuildCommit).
-			Str("BuildVersion", build.BuildVersion).
-			Logger()
-	} else {
-		logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}).
-			Level(logLevel).
-			With().
-			Timestamp().
-			Caller().
-			Logger()
-	}
-
-	return &logger
 }

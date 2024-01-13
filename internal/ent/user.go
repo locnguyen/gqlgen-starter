@@ -3,11 +3,14 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
+	"gqlgen-starter/internal/app/models"
 	"gqlgen-starter/internal/ent/user"
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 )
 
@@ -30,9 +33,12 @@ type User struct {
 	LastName string `json:"last_name,omitempty"`
 	// PhoneNumber holds the value of the "phone_number" field.
 	PhoneNumber string `json:"phone_number,omitempty"`
+	// Roles holds the value of the "roles" field.
+	Roles []models.Role `json:"roles,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
-	Edges UserEdges `json:"edges"`
+	Edges        UserEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // UserEdges holds the relations/edges for other nodes in the graph.
@@ -42,6 +48,10 @@ type UserEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
+	// totalCount holds the count of the edges above.
+	totalCount [1]map[string]int
+
+	namedPosts map[string][]*Post
 }
 
 // PostsOrErr returns the Posts value or an error if the edge
@@ -58,7 +68,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldHashedPassword:
+		case user.FieldHashedPassword, user.FieldRoles:
 			values[i] = new([]byte)
 		case user.FieldID:
 			values[i] = new(sql.NullInt64)
@@ -67,7 +77,7 @@ func (*User) scanValues(columns []string) ([]any, error) {
 		case user.FieldCreateTime, user.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -129,21 +139,37 @@ func (u *User) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				u.PhoneNumber = value.String
 			}
+		case user.FieldRoles:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field roles", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &u.Roles); err != nil {
+					return fmt.Errorf("unmarshal field roles: %w", err)
+				}
+			}
+		default:
+			u.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
 }
 
+// Value returns the ent.Value that was dynamically selected and assigned to the User.
+// This includes values selected through modifiers, order, etc.
+func (u *User) Value(name string) (ent.Value, error) {
+	return u.selectValues.Get(name)
+}
+
 // QueryPosts queries the "posts" edge of the User entity.
 func (u *User) QueryPosts() *PostQuery {
-	return (&UserClient{config: u.config}).QueryPosts(u)
+	return NewUserClient(u.config).QueryPosts(u)
 }
 
 // Update returns a builder for updating this User.
 // Note that you need to call User.Unwrap() before calling this method if this User
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (u *User) Update() *UserUpdateOne {
-	return (&UserClient{config: u.config}).UpdateOne(u)
+	return NewUserClient(u.config).UpdateOne(u)
 }
 
 // Unwrap unwraps the User entity that was returned from a transaction after it was closed,
@@ -181,15 +207,36 @@ func (u *User) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("phone_number=")
 	builder.WriteString(u.PhoneNumber)
+	builder.WriteString(", ")
+	builder.WriteString("roles=")
+	builder.WriteString(fmt.Sprintf("%v", u.Roles))
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// Users is a parsable slice of User.
-type Users []*User
+// NamedPosts returns the Posts named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (u *User) NamedPosts(name string) ([]*Post, error) {
+	if u.Edges.namedPosts == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := u.Edges.namedPosts[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
 
-func (u Users) config(cfg config) {
-	for _i := range u {
-		u[_i].config = cfg
+func (u *User) appendNamedPosts(name string, edges ...*Post) {
+	if u.Edges.namedPosts == nil {
+		u.Edges.namedPosts = make(map[string][]*Post)
+	}
+	if len(edges) == 0 {
+		u.Edges.namedPosts[name] = []*Post{}
+	} else {
+		u.Edges.namedPosts[name] = append(u.Edges.namedPosts[name], edges...)
 	}
 }
+
+// Users is a parsable slice of User.
+type Users []*User

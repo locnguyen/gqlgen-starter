@@ -30,26 +30,6 @@ var (
 			},
 		},
 	}
-	// SessionsColumns holds the columns for the "sessions" table.
-	SessionsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "token", Type: field.TypeString, Unique: true},
-		{Name: "data", Type: field.TypeBytes},
-		{Name: "expiry", Type: field.TypeTime},
-	}
-	// SessionsTable holds the schema information for the "sessions" table.
-	SessionsTable = &schema.Table{
-		Name:       "sessions",
-		Columns:    SessionsColumns,
-		PrimaryKey: []*schema.Column{SessionsColumns[0]},
-		Indexes: []*schema.Index{
-			{
-				Name:    "session_expiry",
-				Unique:  false,
-				Columns: []*schema.Column{SessionsColumns[3]},
-			},
-		},
-	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt64, Increment: true},
@@ -60,6 +40,7 @@ var (
 		{Name: "first_name", Type: field.TypeString},
 		{Name: "last_name", Type: field.TypeString},
 		{Name: "phone_number", Type: field.TypeString},
+		{Name: "roles", Type: field.TypeJSON},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -77,7 +58,6 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		PostsTable,
-		SessionsTable,
 		UsersTable,
 	}
 )
