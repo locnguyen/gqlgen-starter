@@ -7,6 +7,7 @@ import (
 	entsql "entgo.io/ent/dialect/sql"
 	"github.com/alexedwards/scs/redisstore"
 	"github.com/alexedwards/scs/v2"
+	"github.com/nats-io/nats.go"
 	"gqlgen-starter/cmd/build"
 	"gqlgen-starter/config"
 	"gqlgen-starter/db"
@@ -49,11 +50,22 @@ func Initialize() (*app.AppContext, error) {
 	sessionManager.Store = redisstore.New(redisPool)
 	gob.Register(&ent.User{})
 
+	nc, err := nats.Connect(config.Application.NatsURL)
+	if err != nil {
+		log.Error().
+			Err(err).
+			Msg("💀  could not connect to nats server  💀")
+	} else {
+		log.Info().
+			Msgf("📣  nats status: %s", nc.Status().String())
+	}
+
 	appCtx := &app.AppContext{
 		DB:             pgConn,
 		EntClient:      entClient,
 		Loaders:        loaders.NewLoaders(entClient),
 		Logger:         &log,
+		Nats:           nc,
 		SessionManager: sessionManager,
 	}
 

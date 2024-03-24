@@ -7,10 +7,14 @@ technologies, so it may not suit you perfectly. At the very least, I hope it hel
 * Postgres and [pgx](https://github.com/JackC/pgx)
 * [Zerolog](https://github.com/obsidiandynamics/zerolog)
 * [Ent](https://entgo.io) as the ORM
+* [nats](https://nats.io/) for pub/sub messaging
+* [Redis](https://redis.io/) for memory caching
 
 ## Getting Started
 
 ### Local Binary
+
+Install the external dependencies first and ensure they are running for the binary to connect to. Then
 
 1. `go mod download`
 2. `touch .env` and copy contents of `.env.example` in there. Customize if you want.

@@ -2,7 +2,7 @@ version: "3.9"
 services:
   api:
     hostname: ${PROJECT_NAME}
-    container_name: ${PROJECT_NAME}
+    container_name: ${PROJECT_NAME}-api
     build:
       dockerfile: Dockerfile
       context: .
@@ -19,7 +19,7 @@ services:
       - redisdb
   postgresdb:
     image: postgres:13-alpine
-    container_name: postgresdb
+    container_name: ${PROJECT_NAME}-postgresdb
     hostname: postgresdb
     ports:
       - ${DEVELOPMENTDB_PORT}
@@ -31,7 +31,7 @@ services:
       POSTGRES_HOST: postgresdb
   postgrestestdb:
     image: postgres:13-alpine
-    container_name: testdb
+    container_name: ${PROJECT_NAME}-testdb
     hostname: postgrestestdb
     ports:
       - "5678:5432"
@@ -47,3 +47,12 @@ services:
     container_name: ${PROJECT_NAME}-redis
     ports:
       - ${REDIS_PORT}
+  nats:
+    image: nats:latest
+    hostname: nats
+    container_name: ${PROJECT_NAME}-nats
+    entrypoint: "/nats-server"
+    command: "-js -m 5555"
+    ports:
+      - 4222:4222
+      - 5555:5555

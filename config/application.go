@@ -8,6 +8,7 @@ type ApplicationConfig struct {
 	DatabaseURL        string
 	GoEnv              string
 	LogLevel           string
+	NatsURL            string
 	RedisAuth          string
 	RedisURL           string
 	ServerPort         string
@@ -32,6 +33,8 @@ func init() {
 
 	viper.SetDefault("LOG_LEVEL", "debug")
 	Application.LogLevel = viper.GetString("LOG_LEVEL")
+
+	Application.NatsURL = viper.GetString("NATS_URL")
 
 	Application.RedisAuth = viper.GetString("REDIS_AUTH")
 
