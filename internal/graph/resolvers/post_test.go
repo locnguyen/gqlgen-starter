@@ -7,6 +7,7 @@ import (
 	"github.com/go-faker/faker/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"strconv"
 	"testing"
 )
 
@@ -63,10 +64,10 @@ type postResp struct {
 }
 
 func (s *PostResolverSuite) TestGetPostQuery() {
-	u, _ := CreateDummyUser(s.T(), s.AppCtx.EntClient)
+	author, _ := CreateDummyUser(s.T(), s.AppCtx.EntClient)
 
 	p, err := s.AppCtx.EntClient.Post.Create().
-		SetAuthor(u).
+		SetAuthor(author).
 		SetContent(faker.Paragraph()).
 		Save(context.Background())
 
@@ -76,14 +77,16 @@ func (s *PostResolverSuite) TestGetPostQuery() {
 
 	var resp postResp
 
-	s.GqlGenClient.MustPost(getPostQuery, &resp, client.Var("id", p.ID))
+	s.GqlGenClient.MustPost(getPostQuery, &resp, client.Var("id", p.ID), AddContextViewerForTesting(author))
 	assert.Equal(s.T(), resp.Post.ID, fmt.Sprint(p.ID))
 	assert.Equal(s.T(), resp.Post.Content, p.Content)
+	assert.Equal(s.T(), resp.Post.Author.ID, strconv.FormatInt(author.ID, 10))
+	assert.Equal(s.T(), resp.Post.Author.Email, author.Email)
 	assert.NotEmpty(s.T(), resp.Post.CreateTime)
 	assert.NotEmpty(s.T(), resp.Post.UpdateTime)
 
 	assert.NotEmpty(s.T(), resp.Post.Author.ID)
-	assert.Equal(s.T(), resp.Post.Author.Email, u.Email)
+	assert.Equal(s.T(), resp.Post.Author.Email, author.Email)
 }
 
 func (s *PostResolverSuite) TestCreatePostMutation() {
@@ -94,6 +97,10 @@ func (s *PostResolverSuite) TestCreatePostMutation() {
 				content
 				createTime
 				updateTime
+				author {
+					id
+					email
+				}
 			}
 		}
 	`
@@ -117,4 +124,6 @@ func (s *PostResolverSuite) TestCreatePostMutation() {
 	assert.Equal(s.T(), content, resp.CreatePost.Content)
 	assert.NotEmpty(s.T(), resp.CreatePost.CreateTime)
 	assert.NotEmpty(s.T(), resp.CreatePost.UpdateTime)
+	assert.Equal(s.T(), resp.CreatePost.Author.ID, strconv.FormatInt(author.ID, 10))
+	assert.Equal(s.T(), resp.CreatePost.Author.Email, author.Email)
 }

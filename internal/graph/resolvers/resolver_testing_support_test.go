@@ -15,6 +15,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gqlgen-starter/db"
 	"gqlgen-starter/internal/app"
+	"gqlgen-starter/internal/app/loaders"
 	"gqlgen-starter/internal/app/models"
 	"gqlgen-starter/internal/ent"
 	"gqlgen-starter/internal/graph/directives"
@@ -45,6 +46,10 @@ func InitTestContext(t *testing.T, testName string) *TestContext {
 
 	dbConn, err := db.OpenPostgresConn(ctx, *databaseURL)
 	if err != nil {
+		log.Error().
+			Err(err).
+			Str("databaseURL", *databaseURL).
+			Msg("starting PG container for unit testing")
 		t.Error(err)
 	}
 	entClient := ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, dbConn)))
@@ -57,6 +62,7 @@ func InitTestContext(t *testing.T, testName string) *TestContext {
 	appCtx := &app.AppContext{
 		DB:             dbConn,
 		EntClient:      entClient,
+		Loaders:        loaders.NewLoaders(entClient),
 		Logger:         &log,
 		SessionManager: sessionManager,
 	}
@@ -85,7 +91,7 @@ func StartPgContainer(ctx context.Context, containerName string) (testcontainers
 			WaitingFor:   wait.ForExposedPort(),
 			Name:         containerName,
 			Env: map[string]string{
-				"POSTGRES_PASSWORD": "password",
+				"POSTGRES_PASSWORD": "postgres",
 				"POSTGRES_USER":     "postgres",
 				"POSTGRES_DB":       "test",
 			},
