@@ -73,7 +73,7 @@ func StartServer() {
 	}
 	srv := resolvers.CreateGqlServer(appCtx, &schemaConfig)
 
-	if config.Application.GoEnv == "development" {
+	if config.Application.IsDevelopment() {
 		http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 		log.Info().
 			Msgf("connect to http://localhost:%s/ for GraphQL playground", config.Application.ServerPort)

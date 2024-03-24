@@ -17,6 +17,10 @@ type ApplicationConfig struct {
 
 var Application ApplicationConfig
 
+func (c *ApplicationConfig) IsDevelopment() bool {
+	return c.GoEnv == "development"
+}
+
 func init() {
 	viper.AutomaticEnv()
 	Application = ApplicationConfig{}
