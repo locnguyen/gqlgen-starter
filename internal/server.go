@@ -21,7 +21,7 @@ func StartServer() {
 	if err != nil {
 		log.Error().
 			Err(err).
-			Msg("🚨could not initialize application context 🚨")
+			Msg("🚨  could not initialize application context  🚨")
 		return
 	}
 
