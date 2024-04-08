@@ -87,10 +87,10 @@ func TestDeleteWithError(t *testing.T) {
 }
 
 func TestFind(t *testing.T) {
-
+	storeData := ulid.Make()
 	kve := MockJetstreamKeyValueEntry{}
 	kve.On("Value").
-		Return([]byte{})
+		Return(storeData.Bytes())
 
 	kvs := MockJetstreamKeyValue{}
 	kvs.On("Get", mock.Anything, mock.Anything).
@@ -103,7 +103,7 @@ func TestFind(t *testing.T) {
 	sessionStore, err := New(js)
 	assert.NoError(t, err)
 
-	data, found, err := sessionStore.Find(ulid.Make().String())
+	data, found, err := sessionStore.Find(storeData.String())
 	assert.NoError(t, err)
 	assert.True(t, found)
 	assert.NotNil(t, data)

@@ -20,13 +20,18 @@ func (js MockJetstream) CreateOrUpdateKeyValue(ctx context.Context, cfg jetstrea
 	return args.Get(0).(jetstream.KeyValue), args.Error(1)
 }
 
-type MockJetstreamKeyValue struct {
-	jetstream.KeyValue
+type MockJetstreamKeyValueEntry struct {
+	jetstream.KeyValueEntry
 	mock.Mock
 }
 
-type MockJetstreamKeyValueEntry struct {
-	jetstream.KeyValueEntry
+func (jkve MockJetstreamKeyValueEntry) Value() []byte {
+	args := jkve.Called()
+	return args.Get(0).([]byte)
+}
+
+type MockJetstreamKeyValue struct {
+	jetstream.KeyValue
 	mock.Mock
 }
 
