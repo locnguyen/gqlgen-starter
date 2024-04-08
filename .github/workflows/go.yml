@@ -22,7 +22,7 @@ jobs:
         go-version: '1.20'
 
     - name: Build
-      run: make build
+      run: touch .env && make build
 
     - name: Test
-      run: make test
+      run: touch .env make test
