@@ -25,4 +25,4 @@ jobs:
       run: touch .env && make build
 
     - name: Test
-      run: touch .env make test
+      run: touch .env && make test
