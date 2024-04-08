@@ -3,7 +3,6 @@ package app
 import (
 	"database/sql"
 	"github.com/alexedwards/scs/v2"
-	"github.com/gomodule/redigo/redis"
 	"github.com/nats-io/nats.go"
 	"github.com/rs/zerolog"
 	"gqlgen-starter/internal/app/loaders"
@@ -16,6 +15,5 @@ type AppContext struct {
 	Loaders        *loaders.Loaders
 	Logger         *zerolog.Logger
 	Nats           *nats.Conn
-	RedisPool      *redis.Pool
 	SessionManager *scs.SessionManager
 }

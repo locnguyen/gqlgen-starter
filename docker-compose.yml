@@ -16,7 +16,6 @@ services:
       - ${PWD:-.}:/home/${PROJECT_NAME}
     depends_on:
       - postgresdb
-      - redisdb
   postgresdb:
     image: postgres:13-alpine
     container_name: ${PROJECT_NAME}-postgresdb
@@ -41,12 +40,6 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_PORT: 5432
       POSTGRES_HOST: postgrestestdb
-  redisdb:
-    image: redis:7.2-alpine
-    hostname: redisdb
-    container_name: ${PROJECT_NAME}-redis
-    ports:
-      - ${REDIS_PORT}
   nats:
     image: nats:latest
     hostname: nats

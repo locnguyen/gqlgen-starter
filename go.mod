@@ -8,7 +8,6 @@ require (
 	github.com/99designs/gqlgen v0.17.36
 	github.com/alexedwards/scs/v2 v2.5.1
 	github.com/go-faker/faker/v4 v4.0.0-beta.3
-	github.com/gomodule/redigo v1.8.9
 	github.com/graph-gophers/dataloader v5.0.0+incompatible
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/jackc/pgx/v4 v4.18.1

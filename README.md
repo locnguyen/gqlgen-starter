@@ -8,7 +8,6 @@ technologies, so it may not suit you perfectly. At the very least, I hope it hel
 * [Zerolog](https://github.com/obsidiandynamics/zerolog)
 * [Ent](https://entgo.io) as the ORM
 * [nats](https://nats.io/) for pub/sub messaging
-* [Redis](https://redis.io/) for memory caching
 
 ## Getting Started
 

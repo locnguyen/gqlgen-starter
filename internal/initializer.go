@@ -38,14 +38,6 @@ func Initialize() (*app.AppContext, error) {
 
 	entClient := ent.NewClient(ent.Driver(entsql.OpenDB(dialect.Postgres, pgConn)))
 
-	redisPool, err := db.NewRedisPool(ctx, config.Application)
-	if err != nil {
-		log.Error().
-			Err(err).
-			Msg("💀  could not create Redis connection pool  💀")
-		return nil, err
-	}
-
 	nc, err := nats.Connect(config.Application.NatsURL)
 	if err != nil {
 		log.Error().
@@ -82,7 +74,6 @@ func Initialize() (*app.AppContext, error) {
 		Loaders:        loaders.NewLoaders(entClient),
 		Logger:         &log,
 		Nats:           nc,
-		RedisPool:      redisPool,
 		SessionManager: sessionManager,
 	}
 
