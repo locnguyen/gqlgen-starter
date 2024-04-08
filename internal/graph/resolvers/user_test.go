@@ -109,3 +109,14 @@ func (suite *UserResolverSuite) TestCreateUserMutation() {
 
 	assert.Equal(suite.T(), "blackwidow@avengers.com", subject.Email)
 }
+
+func (suite *UserResolverSuite) TestCreateUserMutationPasswordMismatch() {
+	var resp struct {
+		CreateUser struct {
+			Token  string `json:"token"`
+			Expiry string `json:"expiry"`
+		}
+	}
+	err := suite.GqlGenClient.Post(`mutation { createUser(input: { firstName: "Natasha" lastName: "Romanova" email: "blackwidow@avengers.com" phoneNumber: "+8888888888" password: "P@ssw0rd!" passwordConfirmation: "xxx" }) { token expiry } }`, &resp, AddContextViewerForTesting(nil))
+	assert.Error(suite.T(), err)
+}
