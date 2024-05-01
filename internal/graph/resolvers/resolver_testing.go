@@ -24,7 +24,7 @@ import (
 type TestContext struct {
 	GqlGenClient *client.Client
 	AppCtx       *app.AppContext
-	pgContainer  testcontainers.Container
+	PgContainer  testcontainers.Container
 }
 
 func AddContextViewerForTesting(u *ent.User) client.Option {
@@ -76,7 +76,7 @@ func InitTestContext(t *testing.T, testName string) *TestContext {
 	return &TestContext{
 		GqlGenClient: gqlGenClient,
 		AppCtx:       appCtx,
-		pgContainer:  postgresC,
+		PgContainer:  postgresC,
 	}
 }
 

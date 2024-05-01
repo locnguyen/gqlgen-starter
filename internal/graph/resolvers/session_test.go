@@ -22,7 +22,7 @@ func (s *SessionResolverSuite) SetupSuite() {
 }
 
 func (s *SessionResolverSuite) TearDownSuite() {
-	defer s.pgContainer.Terminate(context.Background())
+	defer s.PgContainer.Terminate(context.Background())
 	defer s.AppCtx.DB.Close()
 }
 

@@ -26,7 +26,7 @@ func (suite *UserResolverSuite) SetupSuite() {
 }
 
 func (suite *UserResolverSuite) TearDownSuite() {
-	defer suite.pgContainer.Terminate(context.Background())
+	defer suite.PgContainer.Terminate(context.Background())
 	defer suite.AppCtx.DB.Close()
 }
 

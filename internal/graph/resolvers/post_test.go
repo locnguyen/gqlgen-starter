@@ -25,7 +25,7 @@ func (s *PostResolverSuite) SetupSuite() {
 }
 
 func (s *PostResolverSuite) TeardownSuite() {
-	defer s.pgContainer.Terminate(context.Background())
+	defer s.PgContainer.Terminate(context.Background())
 	defer s.AppCtx.DB.Close()
 }
 
