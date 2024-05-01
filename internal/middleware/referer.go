@@ -15,7 +15,9 @@ func getAllowedReferrers() []string {
 	if config.Application.GoEnv == "production" {
 		return []string{}
 	} else {
-		return []string{}
+		return []string{
+			"localhost",
+		}
 	}
 
 }

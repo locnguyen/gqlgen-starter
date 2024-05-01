@@ -48,6 +48,6 @@ func init() {
 	viper.SetDefault("STRUCTURED_LOGGING", true)
 	Application.StructuredLogging = viper.GetBool("STRUCTURED_LOGGING")
 
-	viper.SetDefault("WEBAPP_URL", "http://locahost:9000")
+	viper.SetDefault("WEBAPP_URL", "http://localhost:9000")
 	Application.DefaultReferrerURL = viper.GetString("WEBAPP_URL")
 }
