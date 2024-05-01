@@ -18,7 +18,6 @@ import (
 	"gqlgen-starter/internal/ent"
 	"gqlgen-starter/internal/gql/generated"
 	"gqlgen-starter/internal/graph/directives"
-	"gqlgen-starter/internal/testsupport"
 	"testing"
 )
 
@@ -38,7 +37,7 @@ func AddContextViewerForTesting(u *ent.User) client.Option {
 func InitTestContext(t *testing.T, testName string) *TestContext {
 	log := app.GetLogger()
 	ctx := context.Background()
-	postgresC, databaseURL, err := testsupport.StartPgContainer(ctx, fmt.Sprintf("%s_db", testName))
+	postgresC, databaseURL, err := db.StartPgContainer(ctx, fmt.Sprintf("%s_db", testName))
 	if err != nil {
 		t.Error(err)
 	}

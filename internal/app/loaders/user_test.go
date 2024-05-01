@@ -19,7 +19,7 @@ import (
 
 func TestUserReader_GetUsersBatchFn(t *testing.T) {
 	ctx := context.Background()
-	_, connStr, err := testsupport.StartPgContainer(ctx, "TestUserReader_GetUsersBatchFn")
+	_, connStr, err := db.StartPgContainer(ctx, "TestUserReader_GetUsersBatchFn")
 	assert.NoError(t, err)
 
 	dbConn, err := db.OpenPostgresConn(ctx, *connStr)
@@ -57,7 +57,7 @@ func TestUserReader_GetUsersBatchFn(t *testing.T) {
 
 func TestUserReader_GetUsersBatchFnNotFound(t *testing.T) {
 	ctx := context.Background()
-	_, connStr, err := testsupport.StartPgContainer(ctx, "TestUserReader_GetUsersBatchFn")
+	_, connStr, err := db.StartPgContainer(ctx, "TestUserReader_GetUsersBatchFn")
 	assert.NoError(t, err)
 
 	dbConn, err := db.OpenPostgresConn(ctx, *connStr)
