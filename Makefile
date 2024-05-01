@@ -31,6 +31,9 @@ ent-init:
 graphql:
 	go run github.com/99designs/gqlgen generate
 
+lint:
+	staticcheck ./internal/...
+
 # Creates a new migration file in db/migrations. Atlas will first inspect the test database and perform a diff
 migration:
 	go run -mod=mod internal/ent/migrate/main.go $(NAME)
