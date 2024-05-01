@@ -22,5 +22,11 @@ jobs:
     - name: Build
       run: touch .env && make build
 
+    - name: Lint
+      run: |
+        touch .env
+        go install honnef.co/go/tools/cmd/staticcheck@latest
+        make lint
+
     - name: Test
       run: touch .env && make test
