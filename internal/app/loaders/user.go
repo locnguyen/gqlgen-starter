@@ -6,7 +6,9 @@ import (
 	"github.com/graph-gophers/dataloader"
 	"gqlgen-starter/internal/ent"
 	"gqlgen-starter/internal/ent/user"
+	"gqlgen-starter/internal/oops"
 	"gqlgen-starter/internal/utils"
+	"net/http"
 )
 
 type userReader struct {
@@ -46,8 +48,12 @@ func (r *userReader) GetUsersBatchFn(ctx context.Context, keys dataloader.Keys) 
 	}
 
 	for userID, ix := range keyOrder {
-		e := fmt.Errorf("user %d not found", userID)
-		results[ix] = &dataloader.Result{Data: nil, Error: e}
+		results[ix] = &dataloader.Result{Data: nil, Error: &oops.CodedError{
+			HumanMessage: fmt.Sprintf("user %d not found", userID),
+			Context:      fmt.Sprintf("user %d not found while dataloading", userID),
+			HttpStatus:   http.StatusNotFound,
+			Err:          nil,
+		}}
 	}
 	return results
 }

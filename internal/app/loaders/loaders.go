@@ -12,7 +12,6 @@ type Loaders struct {
 
 // NewLoaders instantiates data loaders
 func NewLoaders(entClient *ent.Client) *Loaders {
-	// define the data loader
 	ur := &userReader{entClient}
 	return &Loaders{
 		UserLoader: dataloader.NewBatchedLoader(ur.GetUsersBatchFn, dataloader.WithWait(time.Millisecond)),
