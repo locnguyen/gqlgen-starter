@@ -76,7 +76,7 @@ stop:
 	docker-compose stop
 
 test:
-	go test ./internal/... -v -coverprofile tmp/cover.out && go tool cover -func tmp/cover.out
+	go test ./... -coverprofile tmp/cover.pre && cat tmp/cover.pre | (grep -v ./internal/ent | grep -v .internal/gql) > tmp/cover.final && go tool cover -func tmp/cover.final
 
 up:
 	docker-compose up
