@@ -8,8 +8,8 @@ import (
 	"context"
 	"fmt"
 	"gqlgen-starter/internal/ent"
-	"gqlgen-starter/internal/graph/generated"
-	"gqlgen-starter/internal/graph/model"
+	"gqlgen-starter/internal/gql/generated"
+	"gqlgen-starter/internal/gql/model"
 	"gqlgen-starter/internal/oops"
 	"gqlgen-starter/internal/utils"
 	"net/http"
@@ -111,7 +111,7 @@ func (r *queryResolver) Post(ctx context.Context, id string) (*ent.Post, error) 
 	return p, nil
 }
 
-// Post returns generated.PostResolver implementation.
+// Post returns generated1.PostResolver implementation.
 func (r *Resolver) Post() generated.PostResolver { return &postResolver{r} }
 
 type postResolver struct{ *Resolver }

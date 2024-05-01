@@ -18,8 +18,8 @@ import (
 	"gqlgen-starter/internal/app/loaders"
 	"gqlgen-starter/internal/app/models"
 	"gqlgen-starter/internal/ent"
+	"gqlgen-starter/internal/gql/generated"
 	"gqlgen-starter/internal/graph/directives"
-	"gqlgen-starter/internal/graph/generated"
 	"testing"
 )
 

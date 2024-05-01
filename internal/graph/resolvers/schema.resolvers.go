@@ -8,7 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"gqlgen-starter/cmd/build"
-	"gqlgen-starter/internal/graph/generated"
+	"gqlgen-starter/internal/gql/generated"
 )
 
 // Hello is the resolver for the hello field.
@@ -26,10 +26,10 @@ func (r *queryResolver) HealthCheck(ctx context.Context) (interface{}, error) {
 	return jsonResponse, nil
 }
 
-// Mutation returns generated.MutationResolver implementation.
+// Mutation returns generated1.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
-// Query returns generated.QueryResolver implementation.
+// Query returns generated1.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }

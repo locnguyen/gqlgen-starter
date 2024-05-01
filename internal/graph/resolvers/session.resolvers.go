@@ -10,8 +10,8 @@ import (
 	"gqlgen-starter/internal/app/models"
 	"gqlgen-starter/internal/ent"
 	"gqlgen-starter/internal/ent/user"
-	"gqlgen-starter/internal/graph/generated"
-	"gqlgen-starter/internal/graph/model"
+	"gqlgen-starter/internal/gql/generated"
+	"gqlgen-starter/internal/gql/model"
 	"gqlgen-starter/internal/oops"
 	"net/http"
 
@@ -35,7 +35,7 @@ func (r *mutationResolver) CreateSession(ctx context.Context, input model.Create
 	if err = bcrypt.CompareHashAndPassword(u.HashedPassword, []byte(input.Password)); err != nil {
 		return nil, &oops.CodedError{
 			HumanMessage: "Invalid credentials",
-			Context:      fmt.Sprintf("comparing hash of password"),
+			Context:      "comparing hash of password",
 			HttpStatus:   http.StatusInternalServerError,
 			Err:          err,
 		}
@@ -97,7 +97,7 @@ func (r *viewerResolver) User(ctx context.Context, obj *ent.Viewer) (*ent.User, 
 	return nil, nil
 }
 
-// Viewer returns generated.ViewerResolver implementation.
+// Viewer returns generated1.ViewerResolver implementation.
 func (r *Resolver) Viewer() generated.ViewerResolver { return &viewerResolver{r} }
 
 type viewerResolver struct{ *Resolver }

@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"gqlgen-starter/internal/app/models"
 	"gqlgen-starter/internal/ent"
-	"gqlgen-starter/internal/graph/generated"
-	"gqlgen-starter/internal/graph/model"
+	"gqlgen-starter/internal/gql/generated"
+	"gqlgen-starter/internal/gql/model"
 	"gqlgen-starter/internal/oops"
 	"gqlgen-starter/internal/utils"
 	"net/http"
@@ -112,7 +112,7 @@ func (r *userResolver) ID(ctx context.Context, obj *ent.User) (string, error) {
 	return id, nil
 }
 
-// User returns generated.UserResolver implementation.
+// User returns generated1.UserResolver implementation.
 func (r *Resolver) User() generated.UserResolver { return &userResolver{r} }
 
 type userResolver struct{ *Resolver }

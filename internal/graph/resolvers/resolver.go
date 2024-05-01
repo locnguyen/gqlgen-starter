@@ -7,8 +7,8 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"gqlgen-starter/internal/app"
+	"gqlgen-starter/internal/gql/generated"
 	"gqlgen-starter/internal/graph/extensions"
-	"gqlgen-starter/internal/graph/generated"
 )
 
 // This file will not be regenerated automatically.

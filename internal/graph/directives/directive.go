@@ -7,7 +7,7 @@ import (
 	"github.com/rs/zerolog"
 	"gqlgen-starter/internal/app/models"
 	"gqlgen-starter/internal/ent"
-	"gqlgen-starter/internal/graph/generated"
+	"gqlgen-starter/internal/gql/generated"
 	"gqlgen-starter/internal/oops"
 	"net/http"
 )

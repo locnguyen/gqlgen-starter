@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"gqlgen-starter/internal/app/models"
 	"gqlgen-starter/internal/ent"
-	"gqlgen-starter/internal/graph/model"
+	"gqlgen-starter/internal/gql/model"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -451,7 +451,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../post.graphql", Input: `type Post {
+	{Name: "../../graph/post.graphql", Input: `type Post {
   id: ID!
   content: String!
   createTime: Time!
@@ -471,7 +471,7 @@ extend type Query {
 extend type Mutation {
   createPost(input: CreatePostInput!): Post!
 }`, BuiltIn: false},
-	{Name: "../schema.graphql", Input: `scalar Time
+	{Name: "../../graph/schema.graphql", Input: `scalar Time
 scalar Upload
 scalar Map
 scalar Any
@@ -492,7 +492,7 @@ type Mutation {
 }
 
 `, BuiltIn: false},
-	{Name: "../session.graphql", Input: `type Session {
+	{Name: "../../graph/session.graphql", Input: `type Session {
   token: String!
   expiry: Time!
 }
@@ -517,7 +517,7 @@ extend type Mutation {
   createSession(input: CreateSessionInput!): Session!
   deleteSession: Boolean!
 }`, BuiltIn: false},
-	{Name: "../user.graphql", Input: `enum Role {
+	{Name: "../../graph/user.graphql", Input: `enum Role {
   SysAdmin
   GenPop
 }
@@ -588,7 +588,7 @@ func (ec *executionContext) field_Mutation_createPost_args(ctx context.Context, 
 	var arg0 model.CreatePostInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNCreatePostInput2gqlgenᚑstarterᚋinternalᚋgraphᚋmodelᚐCreatePostInput(ctx, tmp)
+		arg0, err = ec.unmarshalNCreatePostInput2gqlgenᚑstarterᚋinternalᚋgqlᚋmodelᚐCreatePostInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -603,7 +603,7 @@ func (ec *executionContext) field_Mutation_createSession_args(ctx context.Contex
 	var arg0 model.CreateSessionInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNCreateSessionInput2gqlgenᚑstarterᚋinternalᚋgraphᚋmodelᚐCreateSessionInput(ctx, tmp)
+		arg0, err = ec.unmarshalNCreateSessionInput2gqlgenᚑstarterᚋinternalᚋgqlᚋmodelᚐCreateSessionInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -618,7 +618,7 @@ func (ec *executionContext) field_Mutation_createUser_args(ctx context.Context, 
 	var arg0 model.CreateUserInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNCreateUserInput2gqlgenᚑstarterᚋinternalᚋgraphᚋmodelᚐCreateUserInput(ctx, tmp)
+		arg0, err = ec.unmarshalNCreateUserInput2gqlgenᚑstarterᚋinternalᚋgqlᚋmodelᚐCreateUserInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5001,17 +5001,17 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNCreatePostInput2gqlgenᚑstarterᚋinternalᚋgraphᚋmodelᚐCreatePostInput(ctx context.Context, v interface{}) (model.CreatePostInput, error) {
+func (ec *executionContext) unmarshalNCreatePostInput2gqlgenᚑstarterᚋinternalᚋgqlᚋmodelᚐCreatePostInput(ctx context.Context, v interface{}) (model.CreatePostInput, error) {
 	res, err := ec.unmarshalInputCreatePostInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCreateSessionInput2gqlgenᚑstarterᚋinternalᚋgraphᚋmodelᚐCreateSessionInput(ctx context.Context, v interface{}) (model.CreateSessionInput, error) {
+func (ec *executionContext) unmarshalNCreateSessionInput2gqlgenᚑstarterᚋinternalᚋgqlᚋmodelᚐCreateSessionInput(ctx context.Context, v interface{}) (model.CreateSessionInput, error) {
 	res, err := ec.unmarshalInputCreateSessionInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCreateUserInput2gqlgenᚑstarterᚋinternalᚋgraphᚋmodelᚐCreateUserInput(ctx context.Context, v interface{}) (model.CreateUserInput, error) {
+func (ec *executionContext) unmarshalNCreateUserInput2gqlgenᚑstarterᚋinternalᚋgqlᚋmodelᚐCreateUserInput(ctx context.Context, v interface{}) (model.CreateUserInput, error) {
 	res, err := ec.unmarshalInputCreateUserInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
