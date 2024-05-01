@@ -2,8 +2,6 @@ module gqlgen-starter
 
 go 1.21
 
-toolchain go1.22.2
-
 require (
 	entgo.io/contrib v0.5.0
 	entgo.io/ent v0.13.1
