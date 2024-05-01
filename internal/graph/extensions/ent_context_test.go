@@ -29,3 +29,25 @@ func TestEntClientContextInjector_InterceptResponse(t *testing.T) {
 		return &graphql.Response{Data: []byte(`{"name":"test"}`)}
 	})
 }
+
+func TestEntClientContextInjector_ExtensionName(t *testing.T) {
+	subject := EntClientContextInjector{}
+	assert.Equal(t, "EntClientContextInjector", subject.ExtensionName())
+}
+
+func TestEntClientContextInjector_Validate(t *testing.T) {
+	subject := EntClientContextInjector{}
+	assert.ErrorContains(t, subject.Validate(nil), "Ent client is nil")
+
+	db, _, err := sqlmock.New()
+	if err != nil {
+		assert.NoError(t, err)
+	}
+	defer db.Close()
+	driver := sql.OpenDB("postgres", db)
+	driverOption := ent.Driver(driver)
+	entClient := ent.NewClient(driverOption)
+
+	subject.Entc = entClient
+	assert.NoError(t, subject.Validate(nil), "validation should pass with defined Ent Client")
+}

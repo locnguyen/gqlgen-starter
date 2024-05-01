@@ -22,6 +22,10 @@ func (c *ApplicationConfig) IsDevelopment() bool {
 	return c.GoEnv == "development"
 }
 
+func (c *ApplicationConfig) IsProduction() bool {
+	return c.GoEnv == "production"
+}
+
 func init() {
 	viper.AutomaticEnv()
 	Application = ApplicationConfig{}
