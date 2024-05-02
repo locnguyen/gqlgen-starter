@@ -58,4 +58,4 @@ GraphQL schema).
 
 
 ## To Dos
-- [ ] Add a CI pipeline for GitHub Action and GitLab CI
+- [ ] Add a CI pipeline for GitLab CI
